@@ -93,7 +93,7 @@ ylabel("Amplitude")
 title("Spectrum of Row Row Row Your Boat")
 
 %% Do the envelope detection
-%[env_samples, env_time_s, env_freq, env_freq_axis_kHz] = envelope_detector(signal, time_s, tempo_resolution)
+[env_samples, env_time_s, env_freq, env_freq_axis_kHz] = envelope_detector(signal, time_s, tempo_resolution)
 
 %% Find the Tempo
 %[measured_tempo] = tempo_detection(env_freq, env_freq_axis_kHz)

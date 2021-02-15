@@ -5,7 +5,7 @@ lp1 = dsp.FIRFilter('Numerator',firpm(20,[0 0.03 0.1 1],[1 1 0 0]));
 
 Fs = 22050;
 numSamples = 10000;
-DownsampleFactor = 10/tempo_resolution;
+DownsampleFactor = 15;
 frameSize = 10*DownsampleFactor;
 
 scope1 = dsp.TimeScope( ...
@@ -26,9 +26,9 @@ scope1(signal, env);
 release(scope1);
 
 env_freq = fft(env);
-env_freq_axis_kHz = env_freq/1000; %???
+env_freq_axis_kHz = env_freq/1000;
 env_time_s=(0:numSamples-1)/time_s;
-env_samples = downsample(env, numSamples);
+env_samples = 
 
 end
 
