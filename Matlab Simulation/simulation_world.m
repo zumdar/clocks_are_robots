@@ -7,7 +7,7 @@
 %
 % Inputs: 
 %		Tempo: controls the tempo of the song. This is a number between 0 and 1
-%		Octive: The ocive of the song (normally 4)
+%		Octave: The ocive of the song (normally 4)
 %		fs_kHz: sampling rate in kHz.
 %       tempo_resolution: this is a value between 0 and 1. 1 being full 
 %           resolution. Be careful setting this too high. 1 will lock up
@@ -28,16 +28,16 @@ close all
 %% Set up the world
 fs_kHz = 5;
 
-% Set the tempo and the octive for the conductor
-Octive = 4;
-tempo_s = 0.6 %This is the time in seconds for each note
+% Set the tempo and the octave for the conductor
+octave = 4;
+tempo_s = 0.6; %This is the time in seconds for each note
 
 %% Parameters for code simulation
 tempo_resolution = .05; %this is a value between 0 and 1. 1 being full resolution
 time_offset = 60;   % This is the delay to the start of the song.
   
 %% Create the song given the tempo
-[song_freq_Hz, song_duration_s] = conductor_simulation(tempo_s,Octive);
+[song_freq_Hz, song_duration_s] = conductor_simulation(tempo_s,octave);
 
 % form up the cumulative durations
 cumulative_duration_s = zeros(1, length(song_duration_s));
@@ -93,10 +93,11 @@ ylabel("Amplitude")
 title("Spectrum of Row Row Row Your Boat")
 
 %% Do the envelope detection
-[env_samples, env_time_s, env_freq, env_freq_axis_kHz] = envelope_detector(signal, time_s, tempo_resolution)
+[env_samples, env_time_s, env_freq, env_freq_axis_kHz] = envelope_detector(signal, linspace(0,2*time_s(end), 2*length(time_s)), tempo_resolution);
 
 %% Find the Tempo
 %[measured_tempo] = tempo_detection(env_freq, env_freq_axis_kHz)
+[measured_tempo] = tempo_detection_1(env_samples, env_time_s, 1e-2);
 
 %% Sync the time
 %[measured_time_offset_s] = sync_time(env_samples, digital, time_s, tempo_resolution, fskHz)
