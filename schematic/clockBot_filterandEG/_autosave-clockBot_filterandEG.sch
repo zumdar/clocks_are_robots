@@ -4,12 +4,12 @@ EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
-Title ""
-Date ""
-Rev ""
-Comp ""
-Comment1 ""
-Comment2 ""
+Title "Clocks Are Robots Too"
+Date "2021-02-17"
+Rev "A"
+Comp "ECE3872"
+Comment1 "Filter and Envelope generator for output"
+Comment2 "adapted from Paul McBennett's VCF"
 Comment3 ""
 Comment4 ""
 $EndDescr
