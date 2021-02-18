@@ -3,4 +3,4 @@
 
 
 Tinkercad Simulation of Arduino and circuity: <br>
-https://www.tinkercad.com/things/hcXmSE0aFdF-ece3872-time-zeeper/editel?sharecode=4rmlycJqzD7lXyYxrI0eXajLjDdzARrxfsQ6iGKJxa0
+https://www.tinkercad.com/things/kZ8lBtSx1vj-copy-of-ece3872-time-zeeper/editel?sharecode=Mxh5uRSaNloz5li4VxAIo-LYPFh9B_5_VCMgjHP5ZlA
