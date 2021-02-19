@@ -100,5 +100,5 @@ title("Spectrum of Row Row Row Your Boat")
 [measured_tempo] = tempo_detection_1(env_samples, env_time_s, 1e-2);
 
 %% Sync the time
-%[measured_time_offset_s] = sync_time(env_samples, digital, time_s, tempo_resolution, fskHz)
+[measured_time_offset_s] = sync_time(env_samples, signal, linspace(0,2*time_s(end), 2*length(time_s)), measured_tempo, fs_kHz);
 actual_time_offset_s = time_s(time_offset) %print out the actual start time to compare.
