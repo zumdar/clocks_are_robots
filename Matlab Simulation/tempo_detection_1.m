@@ -1,13 +1,9 @@
 function tempo = tempo_detection(env_samples, env_time, Threshold)
 % Find tempo of input signal given envelope
 % Note: Thresholding not implemented
+% Note: Some delays cause the min silence count to be off by one sample
 %% Resample Amplitude
-resolution = 4; % Will probably make a standalone function and parameterize
-env_samples = round(abs(env_samples*1000)); % Integer version of envelope - may not need this
-
-% Convert to a binary signal based on bit resolution
-conversion_factor = (2^resolution - 1)/max(env_samples); 
-resampled = floor(env_samples*conversion_factor);
+resampled = requantize(env_samples, 4);
 
 % Dumb code: will trash
 % num_bits = 1;
@@ -30,15 +26,21 @@ resampled = floor(env_samples*conversion_factor);
 Ts = 1/(length(env_time)-1)*(sum(env_time(2:end)-env_time(1:end-1))); % Average sampling period - in case there is some error
 zero_count = 0;
 min_count = inf;
-for i = 2:length(resampled)
+% silence at the beginning could be a cut off rest
+start_counting = 0; 
+for i = 1:length(resampled)
     if resampled(i) == 0
-        zero_count = zero_count + 1;
+        if start_counting
+            zero_count = zero_count + 1;
+        end
     elseif zero_count
         if zero_count < min_count
             min_count = zero_count;
             location = i;
         end
         zero_count = 0;
+    else
+        start_counting = 1; % start counting after first rising edge
     end
 end
 
