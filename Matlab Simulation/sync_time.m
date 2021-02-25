@@ -34,18 +34,22 @@ high_C = 32.70320*2^octave;
 notes = [C, rest, C, rest, C, rest, D, rest, E, rest, E, rest, D, rest, E, rest, F, rest, G, rest, high_C, rest, high_C, rest, high_C, rest, G, rest, G, rest, G, rest, E, rest, E, rest, E, rest, C, rest, C, rest, C, rest, G, rest, F, rest, E, rest, D, rest, C, rest];
 beats = [2,1,2,1,2,1,1,1,2,1,2,1,1,1,2,1,1,1,6,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,2,1,1,1,5,1];
 ref_signal = [];
+env_ref = [];
 t = 0:1/fs:sum(beats)*tempo;
 start_time = 0;
 for i = 1:length(beats)
     time = start_time:1/fs:start_time+beats(i)*tempo;
     start_time = time(end) + 1/fs;
     ref_signal = [ref_signal, sin(2*pi*notes(i)*time)];
+%     if mod(i,2)
+%         env_ref = [env_ref, ones(
 end
 
 % ref_signal = [ref_signal, ref_signal];
-correlation = conv(digital, ref_signal);
+correlation = xcorr(ref_signal, digital);
+correlation = (correlation - mean(correlation))/std(correlation);
 % autocorrelation = autocorrelation(1:floor(length(autocorrelation)/2));
-[~, ind] = max(correlation);
+[~, ind] = max(abs(correlation));
 plot(correlation)
 
 subplot(121)
@@ -53,6 +57,9 @@ plot(digital)
 subplot(122)
 plot(ref_signal)
 
-measured_time_offset_s = ind/fs;
+while ind/fs > 0
+    ind = ind - length(digital);
+end
+measured_time_offset_s = -ind/fs;
 end
 

@@ -1,5 +1,5 @@
-function tempo = tempo_detection(env_samples, env_time, Threshold)
-% Find tempo of input signal given envelope
+function tempo = tempo_detection_1(env_samples, env_time, Threshold)
+%TEMPO_DETECTION Find tempo of input signal given envelope
 % Note: Thresholding not implemented
 % Note: Some delays cause the min silence count to be off by one sample
 %% Resample Amplitude

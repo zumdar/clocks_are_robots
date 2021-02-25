@@ -34,7 +34,7 @@ tempo_s = 0.6; %This is the time in seconds for each note
 
 %% Parameters for code simulation
 tempo_resolution = .05; %this is a value between 0 and 1. 1 being full resolution
-time_offset = 60;   % This is the delay to the start of the song.
+time_offset = 8500;   % This is the delay to the start of the song.
   
 %% Create the song given the tempo
 [song_freq_Hz, song_duration_s] = conductor_simulation(tempo_s,octave);
@@ -102,3 +102,4 @@ title("Spectrum of Row Row Row Your Boat")
 %% Sync the time
 [measured_time_offset_s] = sync_time(env_samples, signal, linspace(0,2*time_s(end), 2*length(time_s)), measured_tempo, fs_kHz);
 actual_time_offset_s = time_s(time_offset) %print out the actual start time to compare.
+abs(tempo_s - measured_tempo) < 1e-4 && abs(measured_time_offset_s - actual_time_offset_s) < 1e-2
