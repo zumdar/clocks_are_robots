@@ -28,7 +28,7 @@
 #define high_Cserv 255
 
 int servoNotes[] = {Cserv, Cserv, Cserv, Cserv, Cserv, Cserv, Dserv, Dserv, Eserv, Eserv, Eserv, Eserv, Dserv, Dserv, Eserv, Eserv, Fserv, Fserv, Gserv, Gserv, high_Cserv, high_Cserv, high_Cserv, high_Cserv, high_Cserv, high_Cserv, Gserv, Gserv, Gserv, Gserv, Gserv, Gserv, Eserv, Eserv, Eserv, Eserv, Eserv, Eserv, Cserv, Cserv, Cserv, Cserv, Cserv, Cserv, Gserv, Gserv, Fserv, Fserv, Eserv, Eserv, Dserv, Dserv, Cserv, Cserv};
-
+int degree = 7.5;
 int currAngle = 0;  
 
 Stepper myStepper(currAngle, 8, 9, 10, 11);
@@ -44,7 +44,7 @@ void loop() {
   for (int angle : servoNotes) {
     int difference = angle - currAngle;
     Serial.println("clockwise");
-    myStepper.step(difference/1.8);
+    myStepper.step(difference/degree);
     delay(500);
     currAngle = angle;
   }
