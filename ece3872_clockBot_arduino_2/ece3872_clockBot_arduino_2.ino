@@ -51,7 +51,7 @@ Servo metronomeServo;  // create servo object to control a metronom servo
 int octavePin = A0;
 int tempoPin = A1; // envelope or comparator input
 int audioInput = A2;
-#define threshold 200 // Conventions are bad, this is only temporary. Replace w/ threshold input
+#define threshold 340 // Conventions are bad, this is only temporary. Replace w/ threshold input
 #define START_BUTTON 8
 #define STOP_BUTTON 9
 
@@ -151,9 +151,9 @@ void setup() {
 void loop() {
 
   int duration;
-  int tempo;
+  double tempo;
   int tempoRaw;
-  int sampleRate = 5000;
+  long sampleRate = 5000L;
   int motor_speed;
 
   ///----------------------------------
@@ -171,12 +171,16 @@ void loop() {
   //------------------------------------
   
   tempo = getTempo();
-  int DFTsize = 200;
+  Serial.println((int)(tempo*1000));
+  int DFTsize = 500;
   int* FFTindices = DFTind(DFTsize, 1.0/sampleRate);
-  int windowLength = ceil(tempo*sampleRate); // window is the size of a single beat
+  Serial.println(FFTindices[0]);
+//  long windowLength = ceil(tempo*sampleRate); // window is the size of a single beat
+  long windowLength = 2195L;
+  Serial.println(windowLength, 4);
   int window[windowLength];
   float v[3];
-  float fftValues[3];
+  float fftValues[8];
   int strongFreq[6] = {0, 0, 0, 0, 0, 0}; // We want [E, *, D, *, C, C]; 
   
   bool detected = false;
@@ -189,7 +193,7 @@ void loop() {
     }
 
     // Goertzel calculation of FFT values
-    for (int* k = FFTindices; k < FFTindices + 3; k++) {
+    for (int* k = FFTindices; k < FFTindices + 8; k++) {
       for (int n = 0; n < DFTsize; n++) {
         if (n == 0) {
           v[2] = window[0];
@@ -212,7 +216,7 @@ void loop() {
     
     float maximum;
     int maxInd = 0;
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 8; i++) {
       if (i == 0) {
         maximum = fftValues[0];
       } else {
@@ -223,10 +227,18 @@ void loop() {
       }
     } 
     strongFreq[sizeof(strongFreq)/sizeof(int) - 1] = maxInd + 1; //just some notation b/c initial array is all zeroes
-    if (strongFreq[0] == 1 && strongFreq[2] == 2 && strongFreq[4] == 3 && strongFreq[5] == 3) {
+    for (int i = 0; i < sizeof(strongFreq)/sizeof(int); i++) {
+//      Serial.print(strongFreq[i]); Serial.print(' ');
+//        if (i == sizeof(strongFreq)/sizeof(int) - 1) {
+//          Serial.println("");
+//        }
+    }
+ 
+    if (strongFreq[0] == 3 && strongFreq[2] == 2 && strongFreq[4] == 1 && strongFreq[5] == 1) {
       detected == true;
-    } 
-  }
+      while(true) {};
+    }
+  } 
   
 //  long currTime = millis(); // now that we've seen the second beat of C, wait 4 more beats before playing;
 //  while (millis() - currTime < long(4*1000.0/sampleRate)) {}
@@ -306,19 +318,26 @@ void solidColor(uint32_t color) {
   strip.show(); // must call this everytime you want the LEDs to update
 }
 
-float getTempo() {
-  float samplePeriod = 1/5000;
+double getTempo() {
+  float samplePeriod = 1.0/5000.0;
   int restCount = 0; //The number of samples so far that count as a rest
   int numRests = 0; // The number of entire rests we have recorded
-  int rests[3];
+  int rests[20];
   int newData;
   bool startCount = false;
+  long cnt = 0;
 
-  while (numRests < 3) {
+  while (numRests < 20) {
     long currTime = millis();
-    newData = analogRead(tempoPin);
-    if (startCount && (newData < threshold)) {
-      restCount++;
+    newData = analogRead(audioInput);
+    if (cnt % 5000 == 0) {
+      Serial.println(newData);
+    }
+//    cnt++;
+    if (newData < threshold) {
+      if (startCount) {
+        restCount++;
+      }
     } else if (restCount) { // rising edge in envelope
       rests[numRests] = restCount;
       numRests++;
@@ -326,26 +345,40 @@ float getTempo() {
     } else {
       startCount = true;
     }
-    while (millis() - currTime < long(samplePeriod*1000)) {} // delay statement to make sure we're sampling as expected
+    while (micros() - currTime < long(samplePeriod*1000000)) {} // delay statement to make sure we're sampling as expected
   }
 
-  return samplePeriod*(rests[1] + rests[2] + rests[3])/3.0; //avg num of rest_samples * sample_period = tempo in sec
+  int restSum = 0;
+  for (int i = 0; i < 20; i++) {
+    Serial.print(rests[i]); Serial.print(' ');
+    restSum += rests[i];
+  }
+  Serial.println(restSum);
+ 
+//  Serial.println((rests[0] + rests[1] + rests[2])/20);
+  double tempo = samplePeriod*(restSum)/20.0; //avg num of rest_samples * sample_period = tempo in sec
+  Serial.println(tempo, 5);
+  return tempo;
 }
 
 int* DFTind(int DFTsize, float samplePeriod) {
-  float freq[3] = {E,D,C};
+  float freq[8] = {C, D, E, F, G, A, B, high_C};
   float f = 1.0/(DFTsize*samplePeriod);
-  float bestF[3] = {f, f, f};
-  int bestInd[3] = {0, 0, 0};
+  float bestF[8] = {f, f, f, f, f, f, f, f};
+  int bestInd[8] = {0, 0, 0, 0, 0, 0, 0, 0};
   
   for (int k = 1; k <= DFTsize; k++) {
     f = k/(DFTsize*samplePeriod);
-    for (int i = 0; i < 3; i++) {
-      if (abs(freq[i] - f) < abs(freq[i] - bestF[i]) {
+    for (int i = 0; i < 8; i++) {
+      if (abs(freq[i] - f) < abs(freq[i] - bestF[i])) {
         bestF[i] = f;
         bestInd[i] = k;
       }
     }
   }
+  for (int i = 0; i < 8; i++) {
+    Serial.print(bestInd[i]); Serial.print(" ");
+  }
+//  while(true) {}
   return &bestInd[0];
 }
