@@ -5169,13 +5169,13 @@ naming: grid - package width</description>
 </class>
 </classes>
 <parts>
-<part name="VOLUME" library="pot" library_urn="urn:adsk.eagle:library:331" deviceset="TRIM_US-" device="S64W" package3d_urn="urn:adsk.eagle:package:22708/1"/>
-<part name="FILTER_CUTOFF" library="pot" library_urn="urn:adsk.eagle:library:331" deviceset="TRIM_US-" device="S64W" package3d_urn="urn:adsk.eagle:package:22708/1"/>
-<part name="OCTAVE_SELECT" library="pot" library_urn="urn:adsk.eagle:library:331" deviceset="TRIM_US-" device="S64W" package3d_urn="urn:adsk.eagle:package:22708/1"/>
+<part name="VOLUME" library="pot" library_urn="urn:adsk.eagle:library:331" deviceset="TRIM_US-" device="S64W" package3d_urn="urn:adsk.eagle:package:22708/1" value="10K Ohms"/>
+<part name="FILTER_CUTOFF" library="pot" library_urn="urn:adsk.eagle:library:331" deviceset="TRIM_US-" device="S64W" package3d_urn="urn:adsk.eagle:package:22708/1" value="1k Ohms"/>
+<part name="OCTAVE_SELECT" library="pot" library_urn="urn:adsk.eagle:library:331" deviceset="TRIM_US-" device="S64W" package3d_urn="urn:adsk.eagle:package:22708/1" value="10K Ohms"/>
 <part name="S1" library="adafruit" library_urn="urn:adsk.eagle:library:420" deviceset="31-XX" device="" package3d_urn="urn:adsk.eagle:package:6240698/1"/>
 <part name="U$1" library="adafruit" library_urn="urn:adsk.eagle:library:420" deviceset="ARDUINO" device="-NODIM" package3d_urn="urn:adsk.eagle:package:6240699/1"/>
-<part name="C1" library="capacitor-wima" library_urn="urn:adsk.eagle:library:116" deviceset="C" device="5/2.5" package3d_urn="urn:adsk.eagle:package:5426/1"/>
-<part name="C2" library="capacitor-wima" library_urn="urn:adsk.eagle:library:116" deviceset="C" device="5/2.5" package3d_urn="urn:adsk.eagle:package:5426/1"/>
+<part name="C1" library="capacitor-wima" library_urn="urn:adsk.eagle:library:116" deviceset="C" device="5/2.5" package3d_urn="urn:adsk.eagle:package:5426/1" value="100uF"/>
+<part name="C2" library="capacitor-wima" library_urn="urn:adsk.eagle:library:116" deviceset="C" device="5/2.5" package3d_urn="urn:adsk.eagle:package:5426/1" value="100uF"/>
 </parts>
 <sheets>
 <sheet>
@@ -5183,15 +5183,15 @@ naming: grid - package width</description>
 </plain>
 <instances>
 <instance part="VOLUME" gate="G$1" x="45.72" y="58.42" smashed="yes" rot="R270">
-<attribute name="NAME" x="40.64" y="60.96" size="1.778" layer="95"/>
-<attribute name="VALUE" x="43.18" y="60.96" size="1.778" layer="96"/>
+<attribute name="NAME" x="40.64" y="63.5" size="1.778" layer="95"/>
+<attribute name="VALUE" x="40.64" y="60.96" size="1.778" layer="96"/>
 </instance>
 <instance part="FILTER_CUTOFF" gate="G$1" x="22.86" y="58.42" smashed="yes" rot="R270">
-<attribute name="NAME" x="12.7" y="60.96" size="1.778" layer="95"/>
-<attribute name="VALUE" x="20.32" y="60.96" size="1.778" layer="96"/>
+<attribute name="NAME" x="12.7" y="63.5" size="1.778" layer="95"/>
+<attribute name="VALUE" x="17.78" y="60.96" size="1.778" layer="96"/>
 </instance>
 <instance part="OCTAVE_SELECT" gate="G$1" x="63.5" y="58.42" smashed="yes" rot="R270">
-<attribute name="NAME" x="53.34" y="60.96" size="1.778" layer="95"/>
+<attribute name="NAME" x="53.34" y="63.5" size="1.778" layer="95"/>
 <attribute name="VALUE" x="60.96" y="60.96" size="1.778" layer="96"/>
 </instance>
 <instance part="S1" gate="1" x="2.54" y="55.88" smashed="yes" rot="R270">
