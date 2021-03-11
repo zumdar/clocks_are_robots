@@ -3163,33 +3163,46 @@ In this library the device names are the same as the pin names of the symbols, t
 <description>&lt;b&gt;Molex Connectors&lt;/b&gt;&lt;p&gt;
 &lt;author&gt;Created by librarian@cadsoft.de&lt;/author&gt;</description>
 <packages>
-<package name="KK-156-7" urn="urn:adsk.eagle:footprint:8078407/1" library_version="4">
-<description>&lt;b&gt;KK® 396 Header, Vertical, Friction Lock, 7 Circuits, Tin (Sn) Plating&lt;/b&gt;&lt;p&gt;&lt;a href =http://www.molex.com/pdm_docs/sd/026604070_sd.pdf&gt;Datasheet &lt;/a&gt;</description>
-<wire x1="13.71" y1="4.95" x2="11.91" y2="4.95" width="0.2032" layer="21"/>
-<wire x1="11.91" y1="4.95" x2="-11.885" y2="4.95" width="0.2032" layer="21"/>
-<wire x1="-11.885" y1="4.95" x2="-13.685" y2="4.95" width="0.2032" layer="21"/>
-<wire x1="-13.685" y1="4.95" x2="-13.685" y2="-4.825" width="0.2032" layer="21"/>
-<wire x1="-13.685" y1="-4.825" x2="13.71" y2="-4.825" width="0.2032" layer="21"/>
-<wire x1="13.71" y1="-4.825" x2="13.71" y2="4.95" width="0.2032" layer="21"/>
-<wire x1="-11.885" y1="2.525" x2="11.91" y2="2.525" width="0.2032" layer="21"/>
-<wire x1="11.91" y1="2.525" x2="11.91" y2="4.95" width="0.2032" layer="21"/>
-<wire x1="-11.885" y1="2.525" x2="-11.885" y2="4.95" width="0.2032" layer="21"/>
-<pad name="1" x="-11.88" y="0" drill="1.7" diameter="2.1844" shape="long" rot="R90"/>
-<pad name="2" x="-7.92" y="0" drill="1.7" diameter="2.1844" shape="long" rot="R90"/>
-<pad name="3" x="-3.96" y="0" drill="1.7" diameter="2.1844" shape="long" rot="R90"/>
-<pad name="4" x="0" y="0" drill="1.7" diameter="2.1844" shape="long" rot="R90"/>
-<pad name="5" x="3.96" y="0" drill="1.7" diameter="2.1844" shape="long" rot="R90"/>
-<pad name="6" x="7.92" y="0" drill="1.7" diameter="2.1844" shape="long" rot="R90"/>
-<pad name="7" x="11.88" y="0" drill="1.7" diameter="2.1844" shape="long" rot="R90"/>
-<text x="-14.38" y="-4.445" size="1.27" layer="25" rot="R90">&gt;NAME</text>
-<text x="15.65" y="-4.445" size="1.27" layer="27" rot="R90">&gt;VALUE</text>
+<package name="5566-8" urn="urn:adsk.eagle:footprint:8078206/1" library_version="4">
+<description>&lt;b&gt;Mini-Fit Jr.™ Vertical Header, 4.20mm Pitch, Dual Row, 8 Circuits, without Snap-in Plastic Peg PCB Lock, Tin, Natural&lt;/b&gt;&lt;p&gt;&lt;a href =http://www.molex.com/pdm_docs/sd/039281083_sd.pdf&gt;Datasheet &lt;/a&gt;</description>
+<wire x1="-8.9" y1="4.5" x2="8.9" y2="4.5" width="0.254" layer="21"/>
+<wire x1="8.9" y1="4.5" x2="8.9" y2="-2.2" width="0.254" layer="21"/>
+<wire x1="8.9" y1="-3.3" x2="8.9" y2="-4.9" width="0.254" layer="21"/>
+<wire x1="8.9" y1="-4.9" x2="-8.9" y2="-4.9" width="0.254" layer="21"/>
+<wire x1="-8.9" y1="-4.9" x2="-8.9" y2="4.5" width="0.254" layer="21"/>
+<wire x1="-12.4" y1="3.2" x2="-9.6" y2="3.2" width="0.254" layer="21" curve="-114.529547"/>
+<wire x1="-12.4" y1="1.4" x2="-9.6" y2="1.4" width="0.254" layer="21" curve="114.529547"/>
+<wire x1="-12.4" y1="3.2" x2="-12.4" y2="1.4" width="0.254" layer="21"/>
+<wire x1="-9.7" y1="3.3" x2="-9" y2="3.3" width="0.254" layer="21"/>
+<wire x1="-9.7" y1="1.3" x2="-9" y2="1.3" width="0.254" layer="21"/>
+<wire x1="9.6" y1="1.4" x2="12.4" y2="1.4" width="0.254" layer="21" curve="114.529547"/>
+<wire x1="9.6" y1="3.2" x2="12.4" y2="3.2" width="0.254" layer="21" curve="-114.529547"/>
+<wire x1="12.4" y1="1.4" x2="12.4" y2="3.2" width="0.254" layer="21"/>
+<wire x1="9.7" y1="1.3" x2="9" y2="1.3" width="0.254" layer="21"/>
+<wire x1="9.7" y1="3.3" x2="9" y2="3.3" width="0.254" layer="21"/>
+<wire x1="8.9" y1="-2.2" x2="8.9" y2="-3.3" width="0.254" layer="21" curve="-180"/>
+<wire x1="-2.1" y1="6.3" x2="2.1" y2="6.3" width="0.254" layer="27"/>
+<wire x1="-2.1" y1="6.3" x2="-2.1" y2="4.6" width="0.254" layer="27"/>
+<wire x1="2.1" y1="6.3" x2="2.1" y2="4.6" width="0.254" layer="27"/>
+<pad name="1" x="6.3" y="-2.75" drill="1.4" shape="square"/>
+<pad name="2" x="2.1" y="-2.75" drill="1.4" shape="square"/>
+<pad name="3" x="-2.1" y="-2.75" drill="1.4" shape="square"/>
+<pad name="4" x="-6.3" y="-2.75" drill="1.4" shape="square"/>
+<pad name="8" x="-6.3" y="2.75" drill="1.4" shape="square"/>
+<pad name="7" x="-2.1" y="2.75" drill="1.4" shape="square"/>
+<pad name="6" x="2.1" y="2.75" drill="1.4" shape="square"/>
+<pad name="5" x="6.3" y="2.75" drill="1.4" shape="square"/>
+<text x="2.54" y="-6.985" size="1.27" layer="25">&gt;NAME</text>
+<text x="-2.54" y="6.985" size="1.27" layer="27">&gt;VALUE</text>
+<hole x="11" y="2.29" drill="3"/>
+<hole x="-11" y="2.29" drill="3"/>
 </package>
 </packages>
 <packages3d>
-<package3d name="KK-156-7" urn="urn:adsk.eagle:package:8078811/1" type="box" library_version="4">
-<description>&lt;b&gt;KK® 396 Header, Vertical, Friction Lock, 7 Circuits, Tin (Sn) Plating&lt;/b&gt;&lt;p&gt;&lt;a href =http://www.molex.com/pdm_docs/sd/026604070_sd.pdf&gt;Datasheet &lt;/a&gt;</description>
+<package3d name="5566-8" urn="urn:adsk.eagle:package:8078580/1" type="box" library_version="4">
+<description>&lt;b&gt;Mini-Fit Jr.™ Vertical Header, 4.20mm Pitch, Dual Row, 8 Circuits, without Snap-in Plastic Peg PCB Lock, Tin, Natural&lt;/b&gt;&lt;p&gt;&lt;a href =http://www.molex.com/pdm_docs/sd/039281083_sd.pdf&gt;Datasheet &lt;/a&gt;</description>
 <packageinstances>
-<packageinstance name="KK-156-7"/>
+<packageinstance name="5566-8"/>
 </packageinstances>
 </package3d>
 </packages3d>
@@ -3207,20 +3220,21 @@ In this library the device names are the same as the pin names of the symbols, t
 </symbol>
 </symbols>
 <devicesets>
-<deviceset name="KK-156-7" urn="urn:adsk.eagle:component:8079133/2" prefix="X" uservalue="yes" library_version="4">
-<description>&lt;b&gt;KK 156 HEADER&lt;/b&gt;&lt;p&gt;
-Source: http://www.molex.com/pdm_docs/sd/026604100_sd.pdf</description>
+<deviceset name="5566-8" urn="urn:adsk.eagle:component:8079095/2" prefix="X" library_version="4">
+<description>&lt;b&gt;Mini FIT connector 8 pol&lt;/b&gt;&lt;p&gt;
+Source: http://www.molex.com</description>
 <gates>
-<gate name="-1" symbol="MV" x="0" y="0" addlevel="always" swaplevel="1"/>
-<gate name="-2" symbol="M" x="0" y="-2.54" addlevel="always" swaplevel="1"/>
-<gate name="-3" symbol="M" x="0" y="-5.08" addlevel="always" swaplevel="1"/>
-<gate name="-4" symbol="M" x="0" y="-7.62" addlevel="always" swaplevel="1"/>
-<gate name="-5" symbol="M" x="0" y="-10.16" addlevel="always" swaplevel="1"/>
-<gate name="-6" symbol="M" x="0" y="-12.7" addlevel="always" swaplevel="1"/>
-<gate name="-7" symbol="M" x="0" y="-15.24" addlevel="always" swaplevel="1"/>
+<gate name="-1" symbol="MV" x="0" y="7.62" addlevel="always"/>
+<gate name="-2" symbol="M" x="0" y="5.08" addlevel="always"/>
+<gate name="-3" symbol="M" x="0" y="2.54" addlevel="always"/>
+<gate name="-4" symbol="M" x="0" y="0" addlevel="always"/>
+<gate name="-5" symbol="M" x="0" y="-2.54" addlevel="always"/>
+<gate name="-6" symbol="M" x="0" y="-5.08" addlevel="always"/>
+<gate name="-7" symbol="M" x="0" y="-7.62" addlevel="always"/>
+<gate name="-8" symbol="M" x="0" y="-10.16" addlevel="always"/>
 </gates>
 <devices>
-<device name="" package="KK-156-7">
+<device name="" package="5566-8">
 <connects>
 <connect gate="-1" pin="S" pad="1"/>
 <connect gate="-2" pin="S" pad="2"/>
@@ -3229,9 +3243,10 @@ Source: http://www.molex.com/pdm_docs/sd/026604100_sd.pdf</description>
 <connect gate="-5" pin="S" pad="5"/>
 <connect gate="-6" pin="S" pad="6"/>
 <connect gate="-7" pin="S" pad="7"/>
+<connect gate="-8" pin="S" pad="8"/>
 </connects>
 <package3dinstances>
-<package3dinstance package3d_urn="urn:adsk.eagle:package:8078811/1"/>
+<package3dinstance package3d_urn="urn:adsk.eagle:package:8078580/1"/>
 </package3dinstances>
 <technologies>
 <technology name="">
@@ -3264,18 +3279,20 @@ Source: http://www.molex.com/pdm_docs/sd/026604100_sd.pdf</description>
 <part name="SUPPLY1" library="supply2" library_urn="urn:adsk.eagle:library:372" deviceset="VDD" device=""/>
 <part name="X_1" library="ngspice-simulation" library_urn="urn:adsk.eagle:library:527439" deviceset="GND" device=""/>
 <part name="R1" library="adafruit" library_urn="urn:adsk.eagle:library:420" deviceset="FLIPFLOP-RES" device="" package3d_urn="urn:adsk.eagle:package:6240726/1" value="10K Ohms"/>
-<part name="X2" library="con-molex" library_urn="urn:adsk.eagle:library:165" deviceset="KK-156-7" device="" package3d_urn="urn:adsk.eagle:package:8078811/1"/>
+<part name="X1" library="con-molex" library_urn="urn:adsk.eagle:library:165" deviceset="5566-8" device="" package3d_urn="urn:adsk.eagle:package:8078580/1"/>
 </parts>
 <sheets>
 <sheet>
 <plain>
 <text x="81.28" y="40.64" size="1.778" layer="91">Octave</text>
 <text x="81.28" y="38.1" size="1.778" layer="91">Volume</text>
-<text x="81.28" y="35.56" size="1.778" layer="91">F1</text>
-<text x="81.28" y="33.02" size="1.778" layer="91">F2</text>
-<text x="81.28" y="27.94" size="1.778" layer="91">5V</text>
-<text x="81.28" y="25.4" size="1.778" layer="91">GND</text>
-<text x="81.28" y="30.48" size="1.778" layer="91">Start-Stop</text>
+<text x="80.9711625" y="32.390646875" size="1.778" layer="91">F1</text>
+<text x="80.9711625" y="29.85065" size="1.778" layer="91">F2</text>
+<text x="81.125584375" y="24.472384375" size="1.778" layer="91">5V</text>
+<text x="81.048375" y="22.009684375" size="1.778" layer="91">GND</text>
+<text x="81.048375" y="27.15604375" size="1.778" layer="91">Start-Stop</text>
+<text x="81.28" y="35.56" size="1.778" layer="91">Volume (Audio Out)</text>
+<text x="81.28" y="38.1" size="1.778" layer="91">Volume (Audio In)</text>
 </plain>
 <instances>
 <instance part="VOLUME" gate="G$1" x="45.72" y="60.96" smashed="yes" rot="R270">
@@ -3302,27 +3319,30 @@ Source: http://www.molex.com/pdm_docs/sd/026604100_sd.pdf</description>
 <attribute name="NAME" x="6.35" y="47.2186" size="1.778" layer="95" rot="R180"/>
 <attribute name="VALUE" x="4.318" y="44.45" size="1.778" layer="96" rot="R270"/>
 </instance>
-<instance part="X2" gate="-1" x="73.66" y="40.64" smashed="yes">
+<instance part="X1" gate="-1" x="73.66" y="40.64" smashed="yes">
 <attribute name="NAME" x="76.2" y="39.878" size="1.524" layer="95"/>
 <attribute name="VALUE" x="72.898" y="42.037" size="1.778" layer="96"/>
 </instance>
-<instance part="X2" gate="-2" x="73.66" y="38.1" smashed="yes">
+<instance part="X1" gate="-2" x="73.66" y="38.1" smashed="yes">
 <attribute name="NAME" x="76.2" y="37.338" size="1.524" layer="95"/>
 </instance>
-<instance part="X2" gate="-3" x="73.66" y="35.56" smashed="yes">
+<instance part="X1" gate="-3" x="73.66" y="35.56" smashed="yes">
 <attribute name="NAME" x="76.2" y="34.798" size="1.524" layer="95"/>
 </instance>
-<instance part="X2" gate="-4" x="73.66" y="33.02" smashed="yes">
+<instance part="X1" gate="-4" x="73.66" y="33.02" smashed="yes">
 <attribute name="NAME" x="76.2" y="32.258" size="1.524" layer="95"/>
 </instance>
-<instance part="X2" gate="-5" x="73.66" y="30.48" smashed="yes">
+<instance part="X1" gate="-5" x="73.66" y="30.48" smashed="yes">
 <attribute name="NAME" x="76.2" y="29.718" size="1.524" layer="95"/>
 </instance>
-<instance part="X2" gate="-6" x="73.66" y="27.94" smashed="yes">
+<instance part="X1" gate="-6" x="73.66" y="27.94" smashed="yes">
 <attribute name="NAME" x="76.2" y="27.178" size="1.524" layer="95"/>
 </instance>
-<instance part="X2" gate="-7" x="73.66" y="25.4" smashed="yes">
+<instance part="X1" gate="-7" x="73.66" y="25.4" smashed="yes">
 <attribute name="NAME" x="76.2" y="24.638" size="1.524" layer="95"/>
+</instance>
+<instance part="X1" gate="-8" x="73.66" y="22.86" smashed="yes">
+<attribute name="NAME" x="76.2" y="22.098" size="1.524" layer="95"/>
 </instance>
 </instances>
 <busses>
@@ -3331,9 +3351,9 @@ Source: http://www.molex.com/pdm_docs/sd/026604100_sd.pdf</description>
 <net name="N$3" class="0">
 <segment>
 <pinref part="FILTER_CUTOFF" gate="G$1" pin="E"/>
-<wire x1="30.48" y1="60.96" x2="30.48" y2="35.56" width="0.1524" layer="91"/>
-<wire x1="30.48" y1="35.56" x2="71.12" y2="35.56" width="0.1524" layer="91"/>
-<pinref part="X2" gate="-3" pin="S"/>
+<wire x1="30.48" y1="60.96" x2="30.48" y2="33.02" width="0.1524" layer="91"/>
+<pinref part="X1" gate="-4" pin="S"/>
+<wire x1="30.48" y1="33.02" x2="71.12" y2="33.02" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$8" class="0">
@@ -3341,40 +3361,36 @@ Source: http://www.molex.com/pdm_docs/sd/026604100_sd.pdf</description>
 <wire x1="63.5" y1="40.64" x2="71.12" y2="40.64" width="0.1524" layer="91"/>
 <pinref part="OCTAVE_SELECT" gate="G$1" pin="S"/>
 <wire x1="63.5" y1="55.88" x2="63.5" y2="40.64" width="0.1524" layer="91"/>
-<pinref part="X2" gate="-1" pin="S"/>
+<pinref part="X1" gate="-1" pin="S"/>
 </segment>
 </net>
 <net name="N$10" class="0">
 <segment>
-<wire x1="45.72" y1="38.1" x2="71.12" y2="38.1" width="0.1524" layer="91"/>
 <pinref part="VOLUME" gate="G$1" pin="S"/>
-<wire x1="45.72" y1="55.88" x2="45.72" y2="38.1" width="0.1524" layer="91"/>
-<pinref part="X2" gate="-2" pin="S"/>
+<wire x1="45.72" y1="55.88" x2="45.72" y2="35.56" width="0.1524" layer="91"/>
+<pinref part="X1" gate="-3" pin="S"/>
+<wire x1="45.72" y1="35.56" x2="71.12" y2="35.56" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$2" class="0">
 <segment>
 <pinref part="FILTER_CUTOFF" gate="G$1" pin="A"/>
-<wire x1="15.24" y1="60.96" x2="15.24" y2="33.02" width="0.1524" layer="91"/>
-<wire x1="15.24" y1="33.02" x2="71.12" y2="33.02" width="0.1524" layer="91"/>
-<pinref part="X2" gate="-4" pin="S"/>
+<wire x1="15.24" y1="60.96" x2="15.24" y2="30.48" width="0.1524" layer="91"/>
+<pinref part="X1" gate="-5" pin="S"/>
+<wire x1="71.12" y1="30.48" x2="15.24" y2="30.48" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$4" class="0">
 <segment>
-<pinref part="VOLUME" gate="G$1" pin="A"/>
-<wire x1="22.86" y1="48.26" x2="38.1" y2="48.26" width="0.1524" layer="91"/>
-<wire x1="38.1" y1="48.26" x2="38.1" y2="60.96" width="0.1524" layer="91"/>
 <pinref part="OCTAVE_SELECT" gate="G$1" pin="A"/>
-<wire x1="38.1" y1="48.26" x2="55.88" y2="48.26" width="0.1524" layer="91"/>
+<wire x1="22.86" y1="48.26" x2="55.88" y2="48.26" width="0.1524" layer="91"/>
 <wire x1="55.88" y1="48.26" x2="55.88" y2="60.96" width="0.1524" layer="91"/>
-<junction x="38.1" y="48.26"/>
 <pinref part="FILTER_CUTOFF" gate="G$1" pin="S"/>
 <wire x1="22.86" y1="48.26" x2="22.86" y2="55.88" width="0.1524" layer="91"/>
-<wire x1="22.86" y1="48.26" x2="22.86" y2="27.94" width="0.1524" layer="91"/>
+<wire x1="22.86" y1="48.26" x2="22.86" y2="25.4" width="0.1524" layer="91"/>
 <junction x="22.86" y="48.26"/>
-<pinref part="X2" gate="-6" pin="S"/>
-<wire x1="22.86" y1="27.94" x2="71.12" y2="27.94" width="0.1524" layer="91"/>
+<pinref part="X1" gate="-7" pin="S"/>
+<wire x1="71.12" y1="25.4" x2="22.86" y2="25.4" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$1" class="0">
@@ -3383,8 +3399,9 @@ Source: http://www.molex.com/pdm_docs/sd/026604100_sd.pdf</description>
 <wire x1="7.62" y1="35.56" x2="7.62" y2="30.48" width="0.1524" layer="91"/>
 <pinref part="S1" gate="1" pin="S"/>
 <wire x1="2.54" y1="30.48" x2="7.62" y2="30.48" width="0.1524" layer="91"/>
-<pinref part="X2" gate="-5" pin="S"/>
-<wire x1="7.62" y1="30.48" x2="71.12" y2="30.48" width="0.1524" layer="91"/>
+<pinref part="X1" gate="-6" pin="S"/>
+<wire x1="71.12" y1="27.94" x2="7.62" y2="27.94" width="0.1524" layer="91"/>
+<wire x1="7.62" y1="27.94" x2="7.62" y2="30.48" width="0.1524" layer="91"/>
 <junction x="7.62" y="30.48"/>
 </segment>
 </net>
@@ -3395,10 +3412,10 @@ Source: http://www.molex.com/pdm_docs/sd/026604100_sd.pdf</description>
 <pinref part="OCTAVE_SELECT" gate="G$1" pin="E"/>
 <wire x1="71.12" y1="60.96" x2="71.12" y2="45.72" width="0.1524" layer="91"/>
 <wire x1="53.34" y1="45.72" x2="71.12" y2="45.72" width="0.1524" layer="91"/>
-<wire x1="53.34" y1="45.72" x2="53.34" y2="25.4" width="0.1524" layer="91"/>
+<wire x1="53.34" y1="45.72" x2="53.34" y2="22.86" width="0.1524" layer="91"/>
 <junction x="53.34" y="45.72"/>
-<pinref part="X2" gate="-7" pin="S"/>
-<wire x1="53.34" y1="25.4" x2="71.12" y2="25.4" width="0.1524" layer="91"/>
+<pinref part="X1" gate="-8" pin="S"/>
+<wire x1="53.34" y1="22.86" x2="71.12" y2="22.86" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="VDD" class="0">
@@ -3413,6 +3430,14 @@ Source: http://www.molex.com/pdm_docs/sd/026604100_sd.pdf</description>
 <pinref part="S1" gate="1" pin="P"/>
 <wire x1="-7.62" y1="25.4" x2="-7.62" y2="30.48" width="0.1524" layer="91"/>
 <pinref part="X_1" gate="G$1" pin="0"/>
+</segment>
+</net>
+<net name="N$6" class="0">
+<segment>
+<pinref part="VOLUME" gate="G$1" pin="A"/>
+<pinref part="X1" gate="-2" pin="S"/>
+<wire x1="38.1" y1="60.96" x2="38.1" y2="38.1" width="0.1524" layer="91"/>
+<wire x1="38.1" y1="38.1" x2="71.12" y2="38.1" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
