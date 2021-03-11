@@ -3275,7 +3275,7 @@ Source: http://www.molex.com/pdm_docs/sd/026604100_sd.pdf</description>
 <text x="81.28" y="33.02" size="1.778" layer="91">F2</text>
 <text x="81.28" y="27.94" size="1.778" layer="91">5V</text>
 <text x="81.28" y="25.4" size="1.778" layer="91">GND</text>
-<text x="81.28" y="30.48" size="1.778" layer="91">Power Input</text>
+<text x="81.28" y="30.48" size="1.778" layer="91">Start-Stop</text>
 </plain>
 <instances>
 <instance part="VOLUME" gate="G$1" x="45.72" y="60.96" smashed="yes" rot="R270">
