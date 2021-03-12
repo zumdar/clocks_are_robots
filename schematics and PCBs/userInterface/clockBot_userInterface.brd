@@ -3,7 +3,7 @@
 <eagle version="9.5.1">
 <drawing>
 <settings>
-<setting alwaysvectorfont="yes"/>
+<setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
 <grid distance="0.000123031496" unitdist="mil" unit="mil" style="lines" multiple="1" display="no" altdistance="5" altunitdist="mil" altunit="mil"/>
@@ -160,17 +160,17 @@
 <wire x1="119.36" y1="0.259615625" x2="119.619334375" y2="14.85385625" width="0" layer="20"/>
 <wire x1="119.619334375" y1="14.85385625" x2="0.259334375" y2="14.85385625" width="0" layer="20"/>
 <wire x1="0.259334375" y1="14.85385625" x2="0" y2="0.259615625" width="0" layer="20"/>
-<text x="52.01173125" y="5.159428125" size="0.762" layer="1">Octave</text>
-<text x="55.853434375" y="4.018696875" size="0.762" layer="1">Audio
+<text x="52.01173125" y="5.159428125" size="0.762" layer="21">Octave</text>
+<text x="55.853434375" y="4.018696875" size="0.762" layer="21">Audio
 In</text>
-<text x="58.708640625" y="3.997034375" size="0.762" layer="1">Audio
+<text x="58.708640625" y="3.997034375" size="0.762" layer="21">Audio
 Out</text>
-<text x="61.727465625" y="4.835315625" size="1.016" layer="1">F1</text>
-<text x="63.9888625" y="4.8565375" size="1.016" layer="1">F2</text>
-<text x="66.096446875" y="4.0642" size="0.762" layer="1">Start
+<text x="61.727465625" y="4.835315625" size="1.016" layer="21">F1</text>
+<text x="63.9888625" y="4.8565375" size="1.016" layer="21">F2</text>
+<text x="66.096446875" y="4.0642" size="0.762" layer="21">Start
 Stop</text>
-<text x="68.9956" y="4.812315625" size="1.016" layer="1">5V</text>
-<text x="71.332234375" y="5.1375375" size="0.762" layer="1">GND</text>
+<text x="68.9956" y="4.812315625" size="1.016" layer="21">5V</text>
+<text x="71.332234375" y="5.1375375" size="0.762" layer="21">GND</text>
 </plain>
 <libraries>
 <library name="pot" urn="urn:adsk.eagle:library:331">
