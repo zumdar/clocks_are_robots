@@ -13695,7 +13695,7 @@ diameter 5 mm, grid 2.54 mm</description>
 <text x="60.96" y="39.878" size="1.778" layer="91">AIN2</text>
 <text x="61.214" y="47.244" size="1.778" layer="91">BIN1</text>
 <text x="61.214" y="50.038" size="1.778" layer="91">BIN2</text>
-<text x="35.56" y="73.66" size="1.778" layer="91">TB6612 Stepper Motor Driver</text>
+<text x="83.82" y="68.58" size="1.778" layer="91">TB6612 Stepper Motor Driver</text>
 <text x="129.54" y="60.96" size="1.778" layer="91">Stepper Motor Out</text>
 <text x="-25.4" y="111.76" size="1.778" layer="91">Audio out from Arduino</text>
 <text x="193.04" y="121.92" size="1.778" layer="91">Audio Amplifier</text>
