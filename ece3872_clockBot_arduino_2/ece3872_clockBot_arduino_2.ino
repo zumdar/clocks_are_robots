@@ -114,6 +114,7 @@ bool motors = 1;
 int pitchPos = 0;    // variable to store the pitch servo position
 int metronomePos = 0;    // variable to store the metronome penduluum servo position
 int metronomePosMapped;
+double tempo;
 
 //Row Row Row Your Boat
 int songLength = 54;
@@ -151,8 +152,6 @@ void setup() {
 
 void loop() {
 
-  int duration;
-  double tempo;
   int tempoRaw;
   long sampleRate = 5000L;
   int motor_speed;
@@ -251,19 +250,17 @@ void loop() {
   //playing THE SONG
   //------------------------------------
 
-  int i_note_index = 0;
-
   while (true) /// TODO make variable that activates when its time to play
   {
     if (digitalRead(START_BUTTON)) {
-      buttonISR()
+      buttonISR();
     }
     if (!startSong && testOutput) {
-      playOutput()
+      playOutput();
       testOutput = 0;
     }
     while (startSong) {
-      playOutput()
+      playOutput();
     }
   }
 
@@ -273,9 +270,9 @@ void buttonISR() { // Not really an ISR
   long currTime = millis();
   int riseCount = 0;
   int currLevel = 0;
-  int pastLevel = digitalRead(START_BUTTON)
+  int pastLevel = digitalRead(START_BUTTON);
   while (millis() - currTime < 20) { // detect # of rising edges over 20 ms
-    currLevel = digitalRead(START_BUTTON)
+    currLevel = digitalRead(START_BUTTON);
     if (currLevel && !pastLevel) {
       riseCount++;
     }
@@ -331,16 +328,19 @@ void solidColor(uint32_t color) {
 void playOutput() {
 
   unsigned int mic = 0;
+  int i_note_index = 0;
+  int duration;
 
   while (i_note_index < songLength) {
     if (digitalRead(START_BUTTON)) {
-      buttonISR()
+      buttonISR();
     }
     if (!startSong) {
-      break
+      break;
     }
 
     Serial.println(tempo);
+    
 
     mic = analogRead(audioInput);
     Serial.println(mic);
@@ -379,6 +379,7 @@ void playOutput() {
       if (digitalRead(START_BUTTON)) {
         buttonISR();
         break;
+      }
     }
 
     //increment the note counter
