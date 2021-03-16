@@ -25,6 +25,7 @@
 
 // TODO: create array for servo positions based on note (similar to the notes array)
 //create lighting array
+// TODO: integrate stepper motor w/ main code
 // create pendluluum rotation based on tempo
 // put in code for buttons
 // put in code for octave switching
@@ -37,10 +38,10 @@
 
 
 // OUTPUT SETUP (servos, leds, speaker)
-#define LED_PIN    2
+#define LED_PIN 12
 #define LED_COUNT 7
 #define BRIGHTNESS 255
-#define SPEAKER_PIN 6
+#define SPEAKER_PIN 9
 
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800); // Declare NeoPixel strip object:
 Servo pitchServo;  // create servo object to control a pitch servo
@@ -48,12 +49,11 @@ Servo metronomeServo;  // create servo object to control a metronom servo
 
 //INPUT SETUP
 
-int octavePin = A0;
+int octavePin = A2;
 int tempoPin = A1; // envelope or comparator input
-int audioInput = A2;
+int audioInput = A0;
 #define threshold 340 // Conventions are bad, this is only temporary. Replace w/ threshold input
 #define START_BUTTON 8
-#define STOP_BUTTON 9
 
 //SOUND SETUP
 #define TempoCal 512
@@ -106,8 +106,11 @@ uint32_t high_Ccolor = strip.ColorHSV(65534);
 
 
 
-
-
+bool startSong = 0;
+bool testOutput = 0;
+bool music = 1;
+bool lights = 1;
+bool motors = 1;
 int pitchPos = 0;    // variable to store the pitch servo position
 int metronomePos = 0;    // variable to store the metronome penduluum servo position
 int metronomePosMapped;
@@ -132,12 +135,10 @@ void setup() {
   pinMode(octavePin, INPUT);
   pinMode(tempoPin, INPUT);
   pinMode(START_BUTTON, INPUT);
-  pinMode(STOP_BUTTON, INPUT);
-
   pinMode(SPEAKER_PIN, OUTPUT);
 
   pitchServo.attach(3);  // attaches the servo on pin 3 to the servo object
-  metronomeServo.attach(5);
+  metronomeServo.attach(10);
 
   strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
   strip.show();            // Turn OFF all pixels ASAP
@@ -251,24 +252,94 @@ void loop() {
   //------------------------------------
 
   int i_note_index = 0;
-  //
-//      sample_rate = 5000;
-//      window_s = 1;
-//      window = ceil(sample_rate*window_s);
-//      synced = false;
-//      while (!synced) {
-//  
-//      }
-  unsigned int mic = 0;
 
   while (true) /// TODO make variable that activates when its time to play
   {
+    if (digitalRead(START_BUTTON)) {
+      buttonISR()
+    }
+    if (!startSong && testOutput) {
+      playOutput()
+      testOutput = 0;
+    }
+    while (startSong) {
+      playOutput()
+    }
+  }
+
+}
+
+void buttonISR() { // Not really an ISR
+  long currTime = millis();
+  int riseCount = 0;
+  int currLevel = 0;
+  int pastLevel = digitalRead(START_BUTTON)
+  while (millis() - currTime < 20) { // detect # of rising edges over 20 ms
+    currLevel = digitalRead(START_BUTTON)
+    if (currLevel && !pastLevel) {
+      riseCount++;
+    }
+    pastLevel = currLevel;
+  }
+  switch (riseCount) { //TODO take another look at the redundancy by startSong and testOutput
+  case 0: // Play song in loop
+    music = 1;
+    lights = 1;
+    motors = 1;
+    startSong = 1;
+    testOutput = 0;
+    break;
+  case 1: // All test
+    music = 1;
+    lights = 1;
+    motors = 1;
+    startSong = 0;
+    testOutput = 1;
+    break;
+  case 2:
+    music = 1;
+    lights = 0;
+    motors = 0;
+    startSong = 0;
+    testOutput = 1;
+    break;
+  case 3:
+    music = 0;
+    lights = 1;
+    motors = 0;
+    startSong = 0;
+    testOutput = 1;
+    break;
+  case 4:
+    music = 0;
+    lights = 0;
+    motors = 1;
+    startSong = 0;
+    testOutput = 1;
+    break;
+  }
+}
 
 
-    //read the tempo pot
-    //      tempoRaw = analogRead(tempoPin);
-//    tempoRaw = 512;
-//    tempo = song_tempo * float(tempoRaw) / TempoCal;	//constrain the tempo value into something useful
+void solidColor(uint32_t color) {
+  for (int i = 0; i < strip.numPixels(); i++) {
+    strip.setPixelColor(i, color);         //  Set pixel's color (in RAM)
+  }
+  strip.show(); // must call this everytime you want the LEDs to update
+}
+
+void playOutput() {
+
+  unsigned int mic = 0;
+
+  while (i_note_index < songLength) {
+    if (digitalRead(START_BUTTON)) {
+      buttonISR()
+    }
+    if (!startSong) {
+      break
+    }
+
     Serial.println(tempo);
 
     mic = analogRead(audioInput);
@@ -276,28 +347,39 @@ void loop() {
 
     //play the song
     duration = beats[i_note_index] * tempo*1000; // in ms
-    tone(SPEAKER_PIN, notes[i_note_index], duration);
-    // set servo rotation for pitch
-    pitchServo.write(servoNotes[i_note_index]);
+    if (music) {
+      tone(SPEAKER_PIN, notes[i_note_index], duration);
+    }
+    
     // metronome servo positioning
-    metronomePos = metronomePos + beats[i_note_index];
-    if (metronomePos >= 36) {
-      metronomePosMapped = map(metronomePos, 36, 72, 128, 64);
+    if (motors) {
+      //TODO: Include stepper motor (clock hand) positioning
+      metronomePos = metronomePos + beats[i_note_index];
+      if (metronomePos >= 36) {
+        metronomePosMapped = map(metronomePos, 36, 72, 128, 64);
+      }
+      else {
+        metronomePosMapped = map(metronomePos, 0, 36, 64, 128);
+      }
+  //    Serial.print("metronome position: ");
+  //    Serial.println(metronomePosMapped);
+      metronomeServo.write(metronomePosMapped);
     }
-    else {
-      metronomePosMapped = map(metronomePos, 0, 36, 64, 128);
-    }
-//    Serial.print("metronome position: ");
-//    Serial.println(metronomePosMapped);
-    metronomeServo.write(metronomePosMapped);
     //led strip output
-    strip.clear();
-    strip.setPixelColor(ledIndexes[i_note_index], ledColors[i_note_index]);         //  Set pixel's color (in RAM)
-    strip.show();
-//    Serial.print("Note playing: ");
-//    Serial.println(notes[i_note_index]);
+    if (lights) {
+      strip.clear();
+      strip.setPixelColor(ledIndexes[i_note_index], ledColors[i_note_index]);         //  Set pixel's color (in RAM)
+      strip.show();
+  //    Serial.print("Note playing: ");
+  //    Serial.println(notes[i_note_index]);
+    }
 
-    delay(duration);
+    long currTime = millis();
+    while (currTime - millis() < duration) {
+      if (digitalRead(START_BUTTON)) {
+        buttonISR();
+        break;
+    }
 
     //increment the note counter
     i_note_index += 2; //as delay covers for the rests, we can skip them here
@@ -307,15 +389,6 @@ void loop() {
       metronomePos = 0;
     }
   }
-
-}
-
-
-void solidColor(uint32_t color) {
-  for (int i = 0; i < strip.numPixels(); i++) {
-    strip.setPixelColor(i, color);         //  Set pixel's color (in RAM)
-  }
-  strip.show(); // must call this everytime you want the LEDs to update
 }
 
 double getTempo() {
