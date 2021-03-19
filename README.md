@@ -1,9 +1,6 @@
 # clocks_are_robots
 ## ECE3872 musical robot team 5B 
 
-<img src="./design_images/clock.png">
-<img src="./design_images/main_pcb.png">
-<img src="./design_images/userInterface._pcb.png">
 
 Tinkercad Simulation of Arduino and circuity: <br>
 https://www.tinkercad.com/things/kZ8lBtSx1vj-copy-of-ece3872-time-zeeper/editel?sharecode=Mxh5uRSaNloz5li4VxAIo-LYPFh9B_5_VCMgjHP5ZlA
@@ -23,3 +20,9 @@ D8 - Start/Stop Button<br>
 D9 - Tone out <br>
 D10 - Servo out<br>
 D12 - Neopixel LED out<br>
+
+# glamour shots
+
+<img src="./design_images/clock.png">
+<img src="./design_images/main_pcb.png">
+<img src="./design_images/userInterface._pcb.png">
