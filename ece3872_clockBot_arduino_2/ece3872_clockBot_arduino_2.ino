@@ -1,21 +1,21 @@
 //-----------------------------------------------------
 // Engineer: William Kennedy, Alex Liu, Erin-Grace Walden, Solomon Martin
 // Overview:
-//		When this device is turned on it listens to the conductor play
-//		plays a song with the conductor. It also displays
-// 		what pitches it is playing with a servo and leds
-//		and displays the timing with a metronome like penduluum
+//    When this device is turned on it listens to the conductor play
+//    plays a song with the conductor. It also displays
+//    what pitches it is playing with a servo and leds
+//    and displays the timing with a metronome like penduluum
 // Design Name:   clocks are robots too
 // File Name:     roboclock.ino
 //
 // Inputs:
-//		Start Switch: switch to start playing the song
-//		Stop switch: stops the song
-//		Volume: controls the volume
-//		Tempo: controls the tempo of the song
-//		Octave Select: control the octave of the song
+//    Start Switch: switch to start playing the song
+//    Stop switch: stops the song
+//    Volume: controls the volume
+//    Tempo: controls the tempo of the song
+//    Octave Select: control the octave of the song
 // Outputs:
-//		Speaker: Used to play the song
+//    Speaker: Used to play the song
 //
 //
 // History:       4 February 2021 - William - File created
@@ -32,8 +32,10 @@
 
 #include <Servo.h>
 #include <Adafruit_NeoPixel.h>
+#include <VariableTimedAction.h>
 #include <stdio.h>
 #include <math.h>
+
 
 
 
@@ -42,6 +44,7 @@
 #define LED_COUNT 7
 #define BRIGHTNESS 255
 #define SPEAKER_PIN 9
+#define TEST_INPUT 6
 
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800); // Declare NeoPixel strip object:
 Servo pitchServo;  // create servo object to control a pitch servo
@@ -52,7 +55,7 @@ Servo metronomeServo;  // create servo object to control a metronom servo
 int octavePin = A2;
 int tempoPin = A1; // envelope or comparator input
 int audioInput = A0;
-#define threshold 340 // Conventions are bad, this is only temporary. Replace w/ threshold input
+#define threshold 200 // Conventions are bad, this is only temporary. Replace w/ threshold input
 #define START_BUTTON 8
 
 //SOUND SETUP
@@ -130,11 +133,10 @@ int servoNotes[] = {Cserv, Cserv, Cserv, Cserv, Cserv, Cserv, Dserv, Dserv, Eser
 int ledIndexes[] = {Cled, Cled, Cled, Cled, Cled, Cled, Dled, Dled, Eled, Eled, Eled, Eled, Dled, Dled, Eled, Eled, Fled, Fled, Gled, Gled, high_Cled, high_Cled, high_Cled, high_Cled, high_Cled, high_Cled, Gled, Gled, Gled, Gled, Gled, Gled, Eled, Eled, Eled, Eled, Eled, Eled, Cled, Cled, Cled, Cled, Cled, Cled, Gled, Gled, Fled, Fled, Eled, Eled, Dled, Dled, Cled, Cled};
 uint32_t ledColors[] = {Ccolor, Ccolor, Ccolor, Ccolor, Ccolor, Ccolor, Dcolor, Dcolor, Ecolor, Ecolor, Ecolor, Ecolor, Dcolor, Dcolor, Ecolor, Ecolor, Fcolor, Fcolor, Gcolor, Gcolor, high_Ccolor, high_Ccolor, high_Ccolor, high_Ccolor, high_Ccolor, high_Ccolor, Gcolor, Gcolor, Gcolor, Gcolor, Gcolor, Gcolor, Ecolor, Ecolor, Ecolor, Ecolor, Ecolor, Ecolor, Ccolor, Ccolor, Ccolor, Ccolor, Ccolor, Ccolor, Gcolor, Gcolor, Fcolor, Fcolor, Ecolor, Ecolor, Dcolor, Dcolor, Ccolor, Ccolor};
 
-
-
 void setup() {
   pinMode(octavePin, INPUT);
   pinMode(tempoPin, INPUT);
+  pinMode(audioInput, INPUT);
   pinMode(START_BUTTON, INPUT);
   pinMode(SPEAKER_PIN, OUTPUT);
 
@@ -153,7 +155,7 @@ void setup() {
 void loop() {
 
   int tempoRaw;
-  long sampleRate = 5000L;
+  int sampleRate = 5000;
   int motor_speed;
 
   ///----------------------------------
@@ -169,15 +171,15 @@ void loop() {
   ///----------------------------------
   ///TEMPO DETECTION & DELAY SYNC
   //------------------------------------
-  
+
   tempo = getTempo();
   Serial.println((int)(tempo*1000));
   int DFTsize = 500;
   int* FFTindices = DFTind(DFTsize, 1.0/sampleRate);
   Serial.println(FFTindices[0]);
-//  long windowLength = ceil(tempo*sampleRate); // window is the size of a single beat
-  long windowLength = 2195L;
-  Serial.println(windowLength, 4);
+//  unsigned int windowLength = floor(tempo*sampleRate); // window is the size of a single beat
+  int windowLength = 300; //Limited by space
+  Serial.println(windowLength);
   int window[windowLength];
   float v[3];
   float fftValues[8];
@@ -185,6 +187,7 @@ void loop() {
   
   bool detected = false;
   long currTime; 
+
   while (!detected) {
     for (int i = 0; i < windowLength; i++) {
       currTime = millis();
@@ -228,15 +231,15 @@ void loop() {
     } 
     strongFreq[sizeof(strongFreq)/sizeof(int) - 1] = maxInd + 1; //just some notation b/c initial array is all zeroes
     for (int i = 0; i < sizeof(strongFreq)/sizeof(int); i++) {
-//      Serial.print(strongFreq[i]); Serial.print(' ');
-//        if (i == sizeof(strongFreq)/sizeof(int) - 1) {
-//          Serial.println("");
-//        }
+      Serial.print(strongFreq[i]); Serial.print(' ');
+        if (i == sizeof(strongFreq)/sizeof(int) - 1) {
+          Serial.println("");
+        }
     }
  
     if (strongFreq[0] == 3 && strongFreq[2] == 2 && strongFreq[4] == 1 && strongFreq[5] == 1) {
       detected == true;
-      while(true) {};
+      while (true) {delay(1000);};
     }
   } 
   
@@ -393,21 +396,23 @@ void playOutput() {
 }
 
 double getTempo() {
-  float samplePeriod = 1.0/5000.0;
+  float samplePeriod = 0.0002; //1.0/5000.0;
   int restCount = 0; //The number of samples so far that count as a rest
   int numRests = 0; // The number of entire rests we have recorded
-  int rests[20];
+  unsigned int rests[20];
+  unsigned long restSum = 0;
   int newData;
   bool startCount = false;
   long cnt = 0;
 
   while (numRests < 20) {
+
     long currTime = millis();
     newData = analogRead(audioInput);
     if (cnt % 5000 == 0) {
       Serial.println(newData);
     }
-//    cnt++;
+    cnt++;
     if (newData < threshold) {
       if (startCount) {
         restCount++;
@@ -422,7 +427,6 @@ double getTempo() {
     while (micros() - currTime < long(samplePeriod*1000000)) {} // delay statement to make sure we're sampling as expected
   }
 
-  int restSum = 0;
   for (int i = 0; i < 20; i++) {
     Serial.print(rests[i]); Serial.print(' ');
     restSum += rests[i];
