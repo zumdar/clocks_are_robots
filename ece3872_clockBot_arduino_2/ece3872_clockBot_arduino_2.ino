@@ -172,26 +172,25 @@ void setup() {
 }
 
 void loop() {
-  playTime = millis();
   mode = digitalRead(playButton);
   if (mode == HIGH) {
     start = millis();
   }
-  if (playTime - start >= 3) {
+  if (playTime - start >= 3000) {
     modeSecond = digitalRead(playButton);
   }
   if (mode == HIGH && modeSecond == HIGH) {
     // test mode
     mode = LOW;
     modeSecond = LOW;
+    playTime = millis();
     while(1) {
-      playTime = millis();
       digitalWrite(testLED, HIGH);
       mode = digitalRead(playButton);
       if (mode == HIGH) {
         start = millis();
       }
-      if (playTime - start >= 3) {
+      if (playTime - start >= 3000) {
         modeSecond = digitalRead(playButton);
       }
       if (mode == HIGH && modeSecond == HIGH) {
