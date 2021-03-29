@@ -197,19 +197,19 @@ void loop() {
       if (mode == HIGH && modeSecond == HIGH) {
         //Output Test
         playOutput();
+        ///----------------------------------
+        ///TEST PROCEDURE FOR LEDS AND SERVOS
+        //------------------------------------
+        solidColor(strip.ColorHSV(32000,   255,   255)); // Red
+        delay(200);
+        solidColor(strip.ColorHSV(56000, 255,   255)); // Green
+        delay(200);
+        solidColor(strip.ColorHSV(10000,   255, 255)); // Blue
+        delay(200);
       } else if (mode == HIGH && modeSecond == LOW){
         //Input Test
         window[i] = analogRead(audioInput);
       }
-      ///----------------------------------
-      ///TEST PROCEDURE FOR LEDS AND SERVOS
-      //------------------------------------
-      solidColor(strip.ColorHSV(32000,   255,   255)); // Red
-      delay(200);
-      solidColor(strip.ColorHSV(56000, 255,   255)); // Green
-      delay(200);
-      solidColor(strip.ColorHSV(10000,   255, 255)); // Blue
-      delay(200);
     }
   } else if (mode == HIGH && modeSecond == LOW){
     // normal play mode
