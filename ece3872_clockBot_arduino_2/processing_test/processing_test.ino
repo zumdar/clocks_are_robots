@@ -38,7 +38,6 @@
 
 
 
-
 // OUTPUT SETUP (servos, leds, speaker)
 #define LED_PIN 12
 #define LED_COUNT 7
@@ -51,12 +50,12 @@ Servo pitchServo;  // create servo object to control a pitch servo
 Servo metronomeServo;  // create servo object to control a metronom servo
 
 //INPUT SETUP
-
 int octavePin = A2;
 int tempoPin = A1; // envelope or comparator input
 int audioInput = A0;
 #define threshold 200 // Conventions are bad, this is only temporary. Replace w/ threshold input
 #define START_BUTTON 8
+#define TEST_TEMPO 0.4 // beat time in ms
 
 //SOUND SETUP
 #define TempoCal 512
@@ -135,13 +134,12 @@ uint32_t ledColors[] = {Ccolor, Ccolor, Ccolor, Ccolor, Ccolor, Ccolor, Dcolor, 
 
 class ProtoThread : public VariableTimedAction {
 
-  int duration = floor(0.4*1000);
+  int duration = floor(TEST_TEMPO*1000);
   int currBeat = 0;
   int beatSum = 0;
   int note_ind = 0;
 
   unsigned long run() {
-//    Serial.println(currBeat);
     if (note_ind >= songLength) {
       currBeat = 0;
       note_ind = 0;
@@ -151,49 +149,14 @@ class ProtoThread : public VariableTimedAction {
       beatSum += beats[note_ind];
       note_ind += 1;
     }
-//    if (notes[note_ind] > 0) {
-//      tone(TEST_INPUT, 
-//    }
     tone(TEST_INPUT, notes[note_ind], duration);
-//    Serial.println(audioInput);
+
     currBeat += 1;
     return 0;
   }
 };
 
 ProtoThread testAudioInput;
-
-
-
-//  void generateTestInput(float testTempo = 0.6) {
-//
-//  int i_note_index = 0;
-//  int beat = 0;
-//  int duration;
-//
-//  if (beat < sum(
-//
-//  while (i_note_index < songLength) {
-//
-//    duration = beats[i_note_index] *tempo*1000; // in ms
-//    tone(TEST_INPUT, notes[i_note_index], duration);
-//      
-//    long currTime = millis();
-//    while (currTime - millis() < duration) {
-//      if (digitalRead(START_BUTTON)) {
-//        buttonISR();
-//        break;
-//      }
-//    }
-//
-//    //increment the note counter
-//    i_note_index += 2; //as delay covers for the rests, we can skip them here
-//    if (i_note_index >= songLength) {
-//      i_note_index = 0;
-//      metronomePos = 0;
-//    }
-//  }
-//}
 
 void setup() {
   pinMode(octavePin, INPUT);
@@ -218,7 +181,7 @@ void setup() {
 void loop() {
 
   int tempoRaw;
-  int sampleRate = 5000;
+  int sampleRate = 2500; // Limits highest input octave to 5, by nyquist sampling of high_C
   int motor_speed;
 
   ///----------------------------------
@@ -236,95 +199,138 @@ void loop() {
   //------------------------------------
 
 
-  testAudioInput.start(0.4*1000, true);
-
-//  while(true) {
-//    testAudioInput.updateActions();
-//    Serial.println(analogRead(audioInput));
-//    delay(50);
-//  }
+  testAudioInput.start(TEST_TEMPO*1000, true);
   
-  tempo = getTempo();
+  tempo = getTempo(1.0/sampleRate);
   testAudioInput.updateActions();
-  Serial.println((int)(tempo*1000));
-  int DFTsize = 500;
+  int DFTsize = 256; //Hopefully multiple of two helps speed
   int* FFTindices = DFTind(DFTsize, 1.0/sampleRate);
-  Serial.println(FFTindices[0]);
-//  unsigned int windowLength = floor(tempo*sampleRate); // window is the size of a single beat
-  int windowLength = 300;
-  Serial.println(windowLength);
+  int windowLength = 256;
   int window[windowLength];
-  float v[3];
+  float v[8][3];
   float fftValues[8];
   int strongFreq[6] = {0, 0, 0, 0, 0, 0}; // We want [E, *, D, *, C, C]; 
   
   bool detected = false;
-  long currTime; 
+  unsigned long currTime; 
+  int cnt = 0;
+
+  int state = 0; //E is 3, D is 2, C is 1
+  int input; // Input to state machine
 
   while (!detected) {
     for (int i = 0; i < windowLength; i++) {
-      currTime = millis();
+      currTime = micros();
       testAudioInput.updateActions();
       window[i] = analogRead(audioInput); // collect window
-      while (currTime - millis() < long(1000.0/sampleRate)) {} // delay by sample period
+//      for (int* k = FFTindices; k < FFTindices + 4; k++) { // TODO: note how calculating v here is too slow
+//        int f = k - FFTindices;
+//        if (i == 0) {
+//            v[f][2] = window[0];
+//          } else if (i == 1) {
+//            v[f][1] = v[f][2];
+//            v[f][2] = 2*cos(2.0*3.14*(*k)/DFTsize)*v[f][1] + window[1];
+//          } else {
+//            v[f][0] = v[f][1];
+//            v[f][1] = v[f][2];
+//            v[f][2] = 2*cos(2.0*3.14*(*k)/DFTsize)*v[f][1] - v[f][0] + window[i];
+//          }
+//      }
+//      if (micros() - currTime > long(1000000.0/sampleRate)) {
+//        Serial.println(micros() - currTime);
+//      }
+      while (micros() - currTime < long(1000000.0/sampleRate)) {} // delay by sample period
     }
 
-
+    // unsigned long currTime2 = millis(); // Print total calculation time per window
     // Goertzel calculation of FFT values
-    for (int* k = FFTindices; k < FFTindices + 8; k++) {
+    for (int* k = FFTindices; k < FFTindices + 4; k++) {
+      int f = k - FFTindices; //index based on frequency
       for (int n = 0; n < DFTsize; n++) {
-        testAudioInput.updateActions();
+//        testAudioInput.updateActions();
         if (n == 0) {
-          v[2] = window[0];
+          v[f][2] = window[0];
         } else if (n == 1) {
-          v[1] = v[2];
-          v[2] = 2*cos(2.0*3.14*(*k)/DFTsize)*v[1] + window[1];
+          v[f][1] = v[f][2];
+          v[f][2] = 2*cos(2.0*3.14*(*k)/DFTsize)*v[f][1] + window[1];
         } else {
-          v[0] = v[1];
-          v[1] = v[2];
-          v[2] = 2*cos(2.0*3.14*(*k)/DFTsize)*v[1] - v[0] + window[n];
+          v[f][0] = v[f][1];
+          v[f][1] = v[f][2];
+          v[f][2] = 2*cos(2.0*3.14*(*k)/DFTsize)*v[f][1] - v[f][0] + window[n];
         }
       }
-      fftValues[k - FFTindices] = pow(v[2], 2) + pow(v[1], 2) - 2*cos(-2.0*3.14*(*k)/DFTsize)*v[2]*v[1];
+      fftValues[f] = pow(v[f][2], 2) + pow(v[f][1], 2) - 2*cos(-2.0*3.14*(*k)/DFTsize)*v[f][2]*v[f][1];
     }
+    // if (cnt % 6 == 0) {
+    //   Serial.println(millis() - currTime2);
+    // }
 
     // Associate the most recent window w/ a note given frequency values
     for (int i = 1; i < sizeof(strongFreq)/sizeof(int); i++) { //shifting previous values back
       strongFreq[i - 1] = strongFreq[i];
     }
-    
-    float maximum;
+    // Determine strongest frequency
+    float maximum = fftValues[0]; //Initializing max at first value
     int maxInd = 0;
-    for (int i = 0; i < 8; i++) {
-      if (i == 0) {
-        maximum = fftValues[0];
-      } else {
-        if (fftValues[i] > maximum) {
-          maximum = fftValues[i];
-          maxInd = i;
-        }
+    for (int i = 1; i < 4; i++) {
+      if (fftValues[i] > maximum) {
+        maximum = fftValues[i];
+        maxInd = i;
       }
     } 
+
+    //Print Values every six loops
     strongFreq[sizeof(strongFreq)/sizeof(int) - 1] = maxInd + 1; //just some notation b/c initial array is all zeroes
-    for (int i = 0; i < sizeof(strongFreq)/sizeof(int); i++) {
-      Serial.print(strongFreq[i]); Serial.print(' ');
-        if (i == sizeof(strongFreq)/sizeof(int) - 1) {
-          Serial.println("");
-        }
+    if (cnt % 6 == 0) {
+      for (int i = 0; i < sizeof(strongFreq)/sizeof(int); i++) {
+        Serial.print(strongFreq[i]); Serial.print(' ');
+          if (i == sizeof(strongFreq)/sizeof(int) - 1) {
+            Serial.println("");
+          }
+      }
     }
- 
-    if (strongFreq[0] == 3 && strongFreq[2] == 2 && strongFreq[4] == 1 && strongFreq[5] == 1) {
-      detected == true;
-      while (true) {delay(1000);};
+    cnt++;
+
+    // State Machine Implementation for Pattern Detection
+    input = strongFreq[sizeof(strongFreq)/sizeof(int) - 1]; //most recent value
+    if (state == 0) { //start
+      if (input == 3) {
+        state = 1;
+      }
+    } else if (state == 1) { // E
+      if (input == 1) {
+        state = 2;
+      } else if (input == 3) {
+        // stay at E
+      } else {
+        state = 0; // Back to start
+      }
+    } else if (state == 2) { // First Rest
+      if (input == 2) {
+        state = 3;
+      } else if (input == 1) {
+        // stay at rest
+      } else { state = 0;} //reset
+    } else if (state == 3) { // D
+      if (input == 1) {
+        state = 4;
+      } else if (input == 2) {
+        // stay at D
+      } else { state = 0;} //reset
+    } else if (state == 4) { // Second Rest
+      detected = true;
     }
-  } 
+      
+  }
   
-//  long currTime = millis(); // now that we've seen the second beat of C, wait 4 more beats before playing;
-//  while (millis() - currTime < long(4*1000.0/sampleRate)) {}
-  // now that we've seen the second beat of C, wait until after final rest to play
-  while (analogRead(audioInput) > threshold) {} //let C finish
-  while (analogRead(audioInput) < threshold) {} //let rest finish
-  
+  while (analogRead(tempoPin) > threshold) { testAudioInput.updateActions(); } //let C finish
+//  Serial.println("Waiting for C to finish");
+  while (analogRead(tempoPin) < threshold) { testAudioInput.updateActions(); } //let rest finish
+//  Serial.println("Final rest finished, now PLAY!!");
+  while (true) {
+    testAudioInput.updateActions();
+    Serial.println(analogRead(audioInput));
+  }
   //------------------------------------
   //playing THE SONG
   //------------------------------------
@@ -419,7 +425,6 @@ void playOutput() {
     }
 
     Serial.println(tempo);
-    
 
     mic = analogRead(audioInput);
     Serial.println(mic);
@@ -471,8 +476,7 @@ void playOutput() {
   }
 }
 
-double getTempo() {
-  float samplePeriod = 0.0002; //1.0/5000.0;
+double getTempo(float samplePeriod) {
   int restCount = 0; //The number of samples so far that count as a rest
   int numRests = 0; // The number of entire rests we have recorded
   unsigned int rests[20];
@@ -486,9 +490,9 @@ double getTempo() {
     testAudioInput.updateActions();
     
     long currTime = millis();
-    newData = analogRead(audioInput);
-    if (cnt % 5000 == 0) {
-      Serial.println(newData);
+    newData = analogRead(tempoPin);
+    if (cnt % round(1/samplePeriod) == 0) {
+//      Serial.println(newData);
     }
     cnt++;
     if (newData < threshold) {
@@ -505,11 +509,11 @@ double getTempo() {
     while (micros() - currTime < long(samplePeriod*1000000)) {} // delay statement to make sure we're sampling as expected
   }
 
-  for (int i = 0; i < 20; i++) {
-    Serial.print(rests[i]); Serial.print(' ');
-    restSum += rests[i];
-  }
-  Serial.println(restSum);
+//  for (int i = 0; i < 20; i++) {
+//    Serial.print(rests[i]); Serial.print(' ');
+//    restSum += rests[i];
+//  }
+//  Serial.println(restSum);
  
 //  Serial.println((rests[0] + rests[1] + rests[2])/20);
   double tempo = samplePeriod*(restSum)/20.0; //avg num of rest_samples * sample_period = tempo in sec
@@ -518,10 +522,10 @@ double getTempo() {
 }
 
 int* DFTind(int DFTsize, float samplePeriod) {
-  float freq[8] = {C, D, E, F, G, A, B, high_C};
+  float freq[8] = {C, D, E, F, G, A, B, high_C}; //TODO
   float f = 1.0/(DFTsize*samplePeriod);
   float bestF[8] = {f, f, f, f, f, f, f, f};
-  int bestInd[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+  static int bestInd[8] = {0, 0, 0, 0, 0, 0, 0, 0}; // Make sure the indices aren't deallocated
   
   for (int k = 1; k <= DFTsize; k++) {
     f = k/(DFTsize*samplePeriod);
@@ -535,6 +539,6 @@ int* DFTind(int DFTsize, float samplePeriod) {
   for (int i = 0; i < 8; i++) {
     Serial.print(bestInd[i]); Serial.print(" ");
   }
-//  while(true) {}
+  Serial.println("");
   return &bestInd[0];
 }
