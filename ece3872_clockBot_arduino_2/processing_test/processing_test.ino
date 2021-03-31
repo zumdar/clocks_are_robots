@@ -489,7 +489,7 @@ double getTempo(float samplePeriod) {
 
     testAudioInput.updateActions();
     
-    long currTime = millis();
+    long currTime = micros();
     newData = analogRead(tempoPin);
     if (cnt % round(1/samplePeriod) == 0) {
 //      Serial.println(newData);
