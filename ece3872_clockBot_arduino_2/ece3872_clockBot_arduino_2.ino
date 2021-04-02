@@ -166,6 +166,7 @@ void loop() {
   // TODO: LEDs Green in Init. State
   while (true) { // Do not continue until we see a button press
     Serial.println("Waiting for button press");
+    solidColor(strip.ColorHSV(56000, 255,   255)); // Green
     mode = digitalRead(START_BUTTON);
     if (mode == HIGH) {
       long buttonPressStart = millis();
@@ -180,10 +181,10 @@ void loop() {
     Serial.println("Test mode");
     mode = LOW;
     modeSecond = LOW;
-    solidColor(strip.ColorHSV(10922, 255,   255));
-      
+    
     while (true) { // Do not continue until we see a button press
       Serial.println("Waiting for input/output");
+      solidColor(strip.ColorHSV(10922, 255,   255));
       mode = digitalRead(START_BUTTON);
       if (mode == HIGH) {
         long buttonPressStart = millis();
@@ -221,7 +222,6 @@ void loop() {
   } else if (mode == HIGH && modeSecond == LOW){
     // normal play mode
     Serial.println("Play mode");
-    solidColor(strip.ColorHSV(56000, 255,   255)); // Green
     while(!digitalRead(START_BUTTON)) {// Loop until next press
       Serial.println("Waiting for octave select.");
       octave = analogRead(octavePin); //TODO: Map 1024 input values to 6 discrete octave values (0-5 for now)
