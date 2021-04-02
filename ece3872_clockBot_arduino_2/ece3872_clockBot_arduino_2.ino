@@ -180,7 +180,7 @@ void loop() {
     Serial.println("Test mode");
     mode = LOW;
     modeSecond = LOW;
-    digitalWrite(testLED, HIGH); // TODO: LEDs Yellow in Test Mode
+    solidColor(strip.ColorHSV(10922, 255,   255));
       
     while (true) { // Do not continue until we see a button press
       Serial.println("Waiting for input/output");
@@ -221,10 +221,43 @@ void loop() {
   } else if (mode == HIGH && modeSecond == LOW){
     // normal play mode
     Serial.println("Play mode");
+    solidColor(strip.ColorHSV(56000, 255,   255)); // Green
     while(!digitalRead(START_BUTTON)) {// Loop until next press
+      Serial.println("Waiting for octave select.");
       octave = analogRead(octavePin); //TODO: Map 1024 input values to 6 discrete octave values (0-5 for now)
-      digitalWrite(playLED, HIGH); //TODO: LED color corresponds to selected octave
+      if (octave >= 0 && octave < 170) {
+        strip.clear();
+        strip.setPixelColor(0, Ccolor);
+        strip.show();
+        octave = 0;
+      } else if (octave >= 170 && octave < 340) {
+        strip.clear();
+        strip.setPixelColor(1, Ccolor);
+        strip.show();
+        octave = 1;
+      } else if (octave >= 340 && octave < 510) {
+        strip.clear();
+        strip.setPixelColor(2, Ccolor);
+        strip.show();
+        octave = 2;
+      } else if (octave >= 510 && octave < 680) {
+        strip.clear();
+        strip.setPixelColor(3, Ccolor);
+        strip.show();
+        octave = 3;
+      } else if (octave >= 680 && octave < 850) {
+        strip.clear();
+        strip.setPixelColor(4, Ccolor);
+        strip.show();
+        octave = 4;
+      } else if (octave >= 850 && octave <= 1024) {
+        strip.clear();
+        strip.setPixelColor(5, Ccolor);
+        strip.show();
+        octave = 5;
+      }
     }
+    strip.clear();
     
     //play mode
     int tempoRaw;
