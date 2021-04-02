@@ -32,7 +32,6 @@
 
 #include <Servo.h>
 #include <Adafruit_NeoPixel.h>
-#include <VariableTimedAction.h>
 #include <stdio.h>
 #include <math.h>
 
@@ -51,7 +50,6 @@ Servo pitchServo;  // create servo object to control a pitch servo
 Servo metronomeServo;  // create servo object to control a metronom servo
 
 //INPUT SETUP
-
 int octavePin = A2;
 int tempoPin = A1; // envelope or comparator input
 int audioInput = A0;
@@ -63,7 +61,7 @@ int audioInput = A0;
 #define TempoPotMax 1023
 #define PwmMax 255
 #define rest 0
-#define octave 4
+int octave = 4; //Default 4 but should change
 
 //Music Notes based on Octave--
 #define C 16.3516*pow(2,octave)
@@ -108,12 +106,13 @@ uint32_t Bcolor = strip.ColorHSV(56174);
 uint32_t high_Ccolor = strip.ColorHSV(65534);
 
 
-
+// playOutput Globals
 bool startSong = 0;
 bool testOutput = 0;
 bool music = 1;
 bool lights = 1;
 bool motors = 1;
+
 int pitchPos = 0;    // variable to store the pitch servo position
 int metronomePos = 0;    // variable to store the metronome penduluum servo position
 int metronomePosMapped;
@@ -134,19 +133,11 @@ int ledIndexes[] = {Cled, Cled, Cled, Cled, Cled, Cled, Dled, Dled, Eled, Eled, 
 uint32_t ledColors[] = {Ccolor, Ccolor, Ccolor, Ccolor, Ccolor, Ccolor, Dcolor, Dcolor, Ecolor, Ecolor, Ecolor, Ecolor, Dcolor, Dcolor, Ecolor, Ecolor, Fcolor, Fcolor, Gcolor, Gcolor, high_Ccolor, high_Ccolor, high_Ccolor, high_Ccolor, high_Ccolor, high_Ccolor, Gcolor, Gcolor, Gcolor, Gcolor, Gcolor, Gcolor, Ecolor, Ecolor, Ecolor, Ecolor, Ecolor, Ecolor, Ccolor, Ccolor, Ccolor, Ccolor, Ccolor, Ccolor, Gcolor, Gcolor, Fcolor, Fcolor, Ecolor, Ecolor, Dcolor, Dcolor, Ccolor, Ccolor};
 
 //Test mode
-const int playButton = 2;
 const int testLED = 4;//yellow LED
 const int playLED = 5;//green LED
 
-int mode = 0;
-int modeSecond = 0;
-unsigned long start = millis();
-unsigned long playTime = millis();
-
-//Octave Select
-const int octaveSelectPot = 3;
-int octaveDetector;
-int octave = 0;
+int mode = LOW;
+int modeSecond = LOW;
 
 void setup() {
   pinMode(octavePin, INPUT);
@@ -155,7 +146,6 @@ void setup() {
   pinMode(START_BUTTON, INPUT);
   pinMode(SPEAKER_PIN, OUTPUT);
   
-  pinMode(playButton, INPUT);
   pinMode(testLED, OUTPUT);
   pinMode(playLED, OUTPUT);
 
@@ -172,212 +162,240 @@ void setup() {
 }
 
 void loop() {
-  playTime = millis();
-  mode = digitalRead(playButton);
-  if (mode == HIGH) {
-    start = millis();
+
+  // TODO: LEDs Green in Init. State
+  while (true) { // Do not continue until we see a button press
+    Serial.println("Waiting for button press");
+    mode = digitalRead(START_BUTTON);
+    if (mode == HIGH) {
+      long buttonPressStart = millis();
+      while(millis() - buttonPressStart < 3000){}; // Functionally the same as delay(3000), but we could define some actions within loop if necessesary
+      modeSecond = digitalRead(START_BUTTON);
+      break;
+    }
   }
-  if (playTime - start >= 3) {
-    modeSecond = digitalRead(playButton);
-  }
+
   if (mode == HIGH && modeSecond == HIGH) {
     // test mode
+    Serial.println("Test mode");
     mode = LOW;
     modeSecond = LOW;
-    while(1) {
-      playTime = millis();
-      digitalWrite(testLED, HIGH);
-      mode = digitalRead(playButton);
+    digitalWrite(testLED, HIGH); // TODO: LEDs Yellow in Test Mode
+      
+    while (true) { // Do not continue until we see a button press
+      Serial.println("Waiting for input/output");
+      mode = digitalRead(START_BUTTON);
       if (mode == HIGH) {
-        start = millis();
-      }
-      if (playTime - start >= 3) {
-        modeSecond = digitalRead(playButton);
-      }
-      if (mode == HIGH && modeSecond == HIGH) {
-        //Output Test
-        playOutput();
-        ///----------------------------------
-        ///TEST PROCEDURE FOR LEDS AND SERVOS
-        //------------------------------------
-        solidColor(strip.ColorHSV(32000,   255,   255)); // Red
-        delay(200);
-        solidColor(strip.ColorHSV(56000, 255,   255)); // Green
-        delay(200);
-        solidColor(strip.ColorHSV(10000,   255, 255)); // Blue
-        delay(200);
-      } else if (mode == HIGH && modeSecond == LOW){
-        //Input Test
-        window[i] = analogRead(audioInput);
+        long buttonPressStart = millis();
+        while(millis() - buttonPressStart < 3000){}; // Functionally the same as delay(3000), but we could define some actions within loop if necessesary
+        modeSecond = digitalRead(START_BUTTON);
+        break;
       }
     }
-  } else if (mode == HIGH && modeSecond == LOW){
-    // normal play mode
-    mode = LOW;
-    modeSecond = LOW;
-    while(1) {
-      digitalWrite(playLED, HIGH);
-      octaveDetector = analogRead(octaveSelectPot);
-      mode = digitalRead(playButton);
-      if (mode == HIGH) {
-        while(1){
-          //play mode
-          int tempoRaw;
-          int sampleRate = 5000;
-          int motor_speed;
-          ///----------------------------------
-          ///TEMPO DETECTION & DELAY SYNC
-          //------------------------------------
-        
-          tempo = getTempo();
-          Serial.println((int)(tempo*1000));
-          int DFTsize = 500;
-          int* FFTindices = DFTind(DFTsize, 1.0/sampleRate);
-          Serial.println(FFTindices[0]);
-        //  unsigned int windowLength = floor(tempo*sampleRate); // window is the size of a single beat
-          int windowLength = 300; //Limited by space
-          Serial.println(windowLength);
-          int window[windowLength];
-          float v[3];
-          float fftValues[8];
-          int strongFreq[6] = {0, 0, 0, 0, 0, 0}; // We want [E, *, D, *, C, C]; 
-          
-          bool detected = false;
-          long currTime; 
-        
-          while (!detected) {
-            for (int i = 0; i < windowLength; i++) {
-              currTime = millis();
-              window[i] = analogRead(audioInput); // collect window
-              while (currTime - millis() < long(1000.0/sampleRate)) {} // delay by sample period
-            }
-        
-            // Goertzel calculation of FFT values
-            for (int* k = FFTindices; k < FFTindices + 8; k++) {
-              for (int n = 0; n < DFTsize; n++) {
-                if (n == 0) {
-                  v[2] = window[0];
-                } else if (n == 1) {
-                  v[1] = v[2];
-                  v[2] = 2*cos(2.0*3.14*(*k)/DFTsize)*v[1] + window[1];
-                } else {
-                  v[0] = v[1];
-                  v[1] = v[2];
-                  v[2] = 2*cos(2.0*3.14*(*k)/DFTsize)*v[1] - v[0] + window[n];
-                }
-              }
-              fftValues[k - FFTindices] = pow(v[2], 2) + pow(v[1], 2) - 2*cos(-2.0*3.14*(*k)/DFTsize)*v[2]*v[1];
-            }
-        
-            // Associate the most recent window w/ a note given frequency values
-            for (int i = 1; i < sizeof(strongFreq)/sizeof(int); i++) { //shifting previous values back
-              strongFreq[i - 1] = strongFreq[i];
-            }
-            
-            float maximum;
-            int maxInd = 0;
-            for (int i = 0; i < 8; i++) {
-              if (i == 0) {
-                maximum = fftValues[0];
-              } else {
-                if (fftValues[i] > maximum) {
-                  maximum = fftValues[i];
-                  maxInd = i;
-                }
-              }
-            } 
-            strongFreq[sizeof(strongFreq)/sizeof(int) - 1] = maxInd + 1; //just some notation b/c initial array is all zeroes
-            for (int i = 0; i < sizeof(strongFreq)/sizeof(int); i++) {
-              Serial.print(strongFreq[i]); Serial.print(' ');
-                if (i == sizeof(strongFreq)/sizeof(int) - 1) {
-                  Serial.println("");
-                }
-            }
-         
-            if (strongFreq[0] == 3 && strongFreq[2] == 2 && strongFreq[4] == 1 && strongFreq[5] == 1) {
-              detected == true;
-              while (true) {delay(1000);};
-            }
-          } 
-          
-        //  long currTime = millis(); // now that we've seen the second beat of C, wait 4 more beats before playing;
-        //  while (millis() - currTime < long(4*1000.0/sampleRate)) {}
-          // now that we've seen the second beat of C, wait until after final rest to play
-          while (analogRead(audioInput) > threshold) {} //let C finish
-          while (analogRead(audioInput) < threshold) {} //let rest finish
-          
-          //------------------------------------
-          //playing THE SONG
-          //------------------------------------
-        
-          while (true) /// TODO make variable that activates when its time to play
-          {
-            if (digitalRead(START_BUTTON)) {
-              buttonISR();
-            }
-            if (!startSong && testOutput) {
-              playOutput();
-              testOutput = 0;
-            }
-            while (startSong) {
-              playOutput();
-            }
-          }
+    if (mode == HIGH && modeSecond == HIGH) {
+      //Output Test
+      Serial.println("Output Test");
+      ///----------------------------------
+      ///TEST PROCEDURE FOR LEDS AND SERVOS
+      //------------------------------------
+      solidColor(strip.ColorHSV(32000,   255,   255)); // Red
+      delay(200);
+      solidColor(strip.ColorHSV(56000, 255,   255)); // Green
+      delay(200);
+      solidColor(strip.ColorHSV(10000,   255, 255)); // Blue
+      delay(200);
+      tempo = 0.5; // Hardcoded tempo for test
+      playOutput();
+    } else if (mode == HIGH && modeSecond == LOW){
+      // Input Test //TODO: Define Input Test w/ Team
+      long startInputTest = millis();
+      while (millis() - startInputTest < 5000) { // Blink w/ envelope for 5 sec
+        if (analogRead(tempoPin) > threshold) {
+          // Turn on Status LED
+        } else {
+          // Turn off Status LED
         }
       }
     }
+
+  } else if (mode == HIGH && modeSecond == LOW){
+    // normal play mode
+    Serial.println("Play mode");
+    while(!digitalRead(START_BUTTON)) {// Loop until next press
+      octave = analogRead(octavePin); //TODO: Map 1024 input values to 6 discrete octave values (0-5 for now)
+      digitalWrite(playLED, HIGH); //TODO: LED color corresponds to selected octave
+    }
+    
+    //play mode
+    int tempoRaw;
+    int sampleRate = 2500; // Limits highest input octave to 5, by nyquist sampling of high_C
+    int motor_speed;
+    ///----------------------------------
+    ///TEMPO DETECTION & DELAY SYNC
+    //------------------------------------
+  
+    tempo = getTempo(1.0/sampleRate);
+    int DFTsize = 256; //Hopefully multiple of two helps speed
+    int* FFTindices = DFTind(DFTsize, 1.0/sampleRate);
+    int windowLength = 256;
+    int window[windowLength];
+    float v[8][3];
+    float fftValues[8];
+    int strongFreq[6] = {0, 0, 0, 0, 0, 0}; // We want [E, *, D, *, C, C]; 
+    
+    bool detected = false;
+    unsigned long currTime; 
+    int cnt = 0;
+
+    int state = 0; //E is 3, D is 2, C is 1
+    int input; // Input to state machine
+
+    while (!detected) {
+      for (int i = 0; i < windowLength; i++) {
+        currTime = micros();
+        window[i] = analogRead(audioInput); // collect window
+        while (micros() - currTime < long(1000000.0/sampleRate)) {} // delay by sample period
+      }
+
+      // Goertzel calculation of FFT values
+      for (int* k = FFTindices; k < FFTindices + 4; k++) {
+        int f = k - FFTindices; //index based on frequency
+        for (int n = 0; n < DFTsize; n++) {
+          if (n == 0) {
+            v[f][2] = window[0];
+          } else if (n == 1) {
+            v[f][1] = v[f][2];
+            v[f][2] = 2*cos(2.0*3.14*(*k)/DFTsize)*v[f][1] + window[1];
+          } else {
+            v[f][0] = v[f][1];
+            v[f][1] = v[f][2];
+            v[f][2] = 2*cos(2.0*3.14*(*k)/DFTsize)*v[f][1] - v[f][0] + window[n];
+          }
+        }
+        fftValues[f] = pow(v[f][2], 2) + pow(v[f][1], 2) - 2*cos(-2.0*3.14*(*k)/DFTsize)*v[f][2]*v[f][1];
+      }
+
+      // Associate the most recent window w/ a note given frequency values
+      for (int i = 1; i < sizeof(strongFreq)/sizeof(int); i++) { //shifting previous values back
+        strongFreq[i - 1] = strongFreq[i];
+      }
+      // Determine strongest frequency
+      float maximum = fftValues[0]; //Initializing max at first value
+      int maxInd = 0;
+      for (int i = 1; i < 4; i++) {
+        if (fftValues[i] > maximum) {
+          maximum = fftValues[i];
+          maxInd = i;
+        }
+      } 
+
+      // State Machine Implementation for Pattern Detection
+      input = strongFreq[sizeof(strongFreq)/sizeof(int) - 1]; //most recent value
+      if (state == 0) { //start
+        if (input == 3) {
+          state = 1;
+        }
+      } else if (state == 1) { // E
+        if (input == 1) {
+          state = 2;
+        } else if (input == 3) {
+          // stay at E
+        } else {
+          state = 0; // Back to start
+        }
+      } else if (state == 2) { // First Rest
+        if (input == 2) {
+          state = 3;
+        } else if (input == 1) {
+          // stay at rest
+        } else { state = 0;} //reset
+      } else if (state == 3) { // D
+        if (input == 1) {
+          state = 4;
+        } else if (input == 2) {
+          // stay at D
+        } else { state = 0;} //reset
+      } else if (state == 4) { // Second Rest
+        detected = true;
+      }
+        
+    }
+    
+    while (analogRead(tempoPin) > threshold) { } //let C finish
+    //  Serial.println("Waiting for C to finish");
+    while (analogRead(tempoPin) < threshold) { } //let rest finish
+    //  Serial.println("Final rest finished, now PLAY!!");
+    // while (true) {
+    //   Serial.println(analogRead(audioInput)); 
+    // }
+    //TODO: Verify playing on time w/ speaker
+    //------------------------------------
+    //playing THE SONG
+    //------------------------------------
+
+    startSong = 1;
+    while (true)
+    {
+      if (!startSong) {
+        break;
+      } else {
+        playOutput();
+      }
+    }
+
   }
 }
 
-void buttonISR() { // Not really an ISR
-  long currTime = millis();
-  int riseCount = 0;
-  int currLevel = 0;
-  int pastLevel = digitalRead(START_BUTTON);
-  while (millis() - currTime < 20) { // detect # of rising edges over 20 ms
-    currLevel = digitalRead(START_BUTTON);
-    if (currLevel && !pastLevel) {
-      riseCount++;
-    }
-    pastLevel = currLevel;
-  }
-  switch (riseCount) { //TODO take another look at the redundancy by startSong and testOutput
-  case 0: // Play song in loop
-    music = 1;
-    lights = 1;
-    motors = 1;
-    startSong = 1;
-    testOutput = 0;
-    break;
-  case 1: // All test
-    music = 1;
-    lights = 1;
-    motors = 1;
-    startSong = 0;
-    testOutput = 1;
-    break;
-  case 2:
-    music = 1;
-    lights = 0;
-    motors = 0;
-    startSong = 0;
-    testOutput = 1;
-    break;
-  case 3:
-    music = 0;
-    lights = 1;
-    motors = 0;
-    startSong = 0;
-    testOutput = 1;
-    break;
-  case 4:
-    music = 0;
-    lights = 0;
-    motors = 1;
-    startSong = 0;
-    testOutput = 1;
-    break;
-  }
+void buttonISR() { // Not really an ISR. Saving commented code for more complex test routines
+  startSong = 0;
+  // long currTime = millis();
+  // int riseCount = 0;
+  // int currLevel = 0;
+  // int pastLevel = digitalRead(START_BUTTON);
+  // while (millis() - currTime < 20) { // detect # of rising edges over 20 ms
+  //   currLevel = digitalRead(START_BUTTON);
+  //   if (currLevel && !pastLevel) {
+  //     riseCount++;
+  //   }
+  //   pastLevel = currLevel;
+  // }
+  // switch (riseCount) { //TODO take another look at the redundancy by startSong and testOutput
+  // case 0: // Play song in loop
+  //   music = 1;
+  //   lights = 1;
+  //   motors = 1;
+  //   startSong = 1;
+  //   testOutput = 0;
+  //   break;
+  // case 1: // All test
+  //   music = 1;
+  //   lights = 1;
+  //   motors = 1;
+  //   startSong = 0;
+  //   testOutput = 1;
+  //   break;
+  // case 2:
+  //   music = 1;
+  //   lights = 0;
+  //   motors = 0;
+  //   startSong = 0;
+  //   testOutput = 1;
+  //   break;
+  // case 3:
+  //   music = 0;
+  //   lights = 1;
+  //   motors = 0;
+  //   startSong = 0;
+  //   testOutput = 1;
+  //   break;
+  // case 4:
+  //   music = 0;
+  //   lights = 0;
+  //   motors = 1;
+  //   startSong = 0;
+  //   testOutput = 1;
+  //   break;
+  // }
 }
 
 
@@ -411,7 +429,7 @@ void playOutput() {
     //play the song
     duration = beats[i_note_index] * tempo*1000; // in ms
     if (music) {
-      tone(SPEAKER_PIN, notes[i_note_index], duration);
+      tone(SPEAKER_PIN, notes[i_note_index]*2, duration); // TODO: define w/ Team what octave we should play in
     }
     
     // metronome servo positioning
@@ -438,7 +456,7 @@ void playOutput() {
     }
 
     long currTime = millis();
-    while (currTime - millis() < duration) {
+    while (millis() - currTime < duration) {
       if (digitalRead(START_BUTTON)) {
         buttonISR();
         break;
@@ -455,8 +473,7 @@ void playOutput() {
   }
 }
 
-double getTempo() {
-  float samplePeriod = 0.0002; //1.0/5000.0;
+double getTempo(float samplePeriod) {
   int restCount = 0; //The number of samples so far that count as a rest
   int numRests = 0; // The number of entire rests we have recorded
   unsigned int rests[20];
@@ -467,12 +484,9 @@ double getTempo() {
 
   while (numRests < 20) {
 
-    long currTime = millis();
-    newData = analogRead(audioInput);
-    if (cnt % 5000 == 0) {
-      Serial.println(newData);
-    }
-    cnt++;
+    long currTime = micros();
+    newData = analogRead(tempoPin);
+
     if (newData < threshold) {
       if (startCount) {
         restCount++;
@@ -487,13 +501,6 @@ double getTempo() {
     while (micros() - currTime < long(samplePeriod*1000000)) {} // delay statement to make sure we're sampling as expected
   }
 
-  for (int i = 0; i < 20; i++) {
-    Serial.print(rests[i]); Serial.print(' ');
-    restSum += rests[i];
-  }
-  Serial.println(restSum);
- 
-//  Serial.println((rests[0] + rests[1] + rests[2])/20);
   double tempo = samplePeriod*(restSum)/20.0; //avg num of rest_samples * sample_period = tempo in sec
   Serial.println(tempo, 5);
   return tempo;
@@ -503,7 +510,7 @@ int* DFTind(int DFTsize, float samplePeriod) {
   float freq[8] = {C, D, E, F, G, A, B, high_C};
   float f = 1.0/(DFTsize*samplePeriod);
   float bestF[8] = {f, f, f, f, f, f, f, f};
-  int bestInd[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+  static int bestInd[8] = {0, 0, 0, 0, 0, 0, 0, 0}; // Make sure the indices aren't deallocated
   
   for (int k = 1; k <= DFTsize; k++) {
     f = k/(DFTsize*samplePeriod);
@@ -514,9 +521,6 @@ int* DFTind(int DFTsize, float samplePeriod) {
       }
     }
   }
-  for (int i = 0; i < 8; i++) {
-    Serial.print(bestInd[i]); Serial.print(" ");
-  }
-//  while(true) {}
+
   return &bestInd[0];
 }
