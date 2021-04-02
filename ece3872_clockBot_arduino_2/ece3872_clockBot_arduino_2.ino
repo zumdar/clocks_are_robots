@@ -136,10 +136,8 @@ uint32_t ledColors[] = {Ccolor, Ccolor, Ccolor, Ccolor, Ccolor, Ccolor, Dcolor, 
 const int testLED = 4;//yellow LED
 const int playLED = 5;//green LED
 
-int mode = 0;
-int modeSecond = 0;
-unsigned long start = millis();
-unsigned long playTime = millis();
+int mode = LOW;
+int modeSecond = LOW;
 
 void setup() {
   pinMode(octavePin, INPUT);
@@ -167,8 +165,9 @@ void loop() {
 
   // TODO: LEDs Green in Init. State
   while (true) { // Do not continue until we see a button press
+    Serial.println("Waiting for button press");
     mode = digitalRead(START_BUTTON);
-    if (mode) {
+    if (mode == HIGH) {
       long buttonPressStart = millis();
       while(millis() - buttonPressStart < 3000){}; // Functionally the same as delay(3000), but we could define some actions within loop if necessesary
       modeSecond = digitalRead(START_BUTTON);
@@ -176,17 +175,17 @@ void loop() {
     }
   }
 
-
   if (mode == HIGH && modeSecond == HIGH) {
     // test mode
+    Serial.println("Test mode");
     mode = LOW;
     modeSecond = LOW;
-    playTime = millis();
     digitalWrite(testLED, HIGH); // TODO: LEDs Yellow in Test Mode
       
     while (true) { // Do not continue until we see a button press
+      Serial.println("Waiting for input/output");
       mode = digitalRead(START_BUTTON);
-      if (mode) {
+      if (mode == HIGH) {
         long buttonPressStart = millis();
         while(millis() - buttonPressStart < 3000){}; // Functionally the same as delay(3000), but we could define some actions within loop if necessesary
         modeSecond = digitalRead(START_BUTTON);
@@ -194,6 +193,8 @@ void loop() {
       }
     }
     if (mode == HIGH && modeSecond == HIGH) {
+      //Output Test
+      Serial.println("Output Test");
       ///----------------------------------
       ///TEST PROCEDURE FOR LEDS AND SERVOS
       //------------------------------------
@@ -203,7 +204,6 @@ void loop() {
       delay(200);
       solidColor(strip.ColorHSV(10000,   255, 255)); // Blue
       delay(200);
-      //Output Test
       tempo = 0.5; // Hardcoded tempo for test
       playOutput();
     } else if (mode == HIGH && modeSecond == LOW){
@@ -218,11 +218,9 @@ void loop() {
       }
     }
 
-
   } else if (mode == HIGH && modeSecond == LOW){
     // normal play mode
-    mode = LOW;
-    modeSecond = LOW;
+    Serial.println("Play mode");
     while(!digitalRead(START_BUTTON)) {// Loop until next press
       octave = analogRead(octavePin); //TODO: Map 1024 input values to 6 discrete octave values (0-5 for now)
       digitalWrite(playLED, HIGH); //TODO: LED color corresponds to selected octave
@@ -323,9 +321,9 @@ void loop() {
         
     }
     
-    while (analogRead(tempoPin) > threshold) { testAudioInput.updateActions(); } //let C finish
+    while (analogRead(tempoPin) > threshold) { } //let C finish
     //  Serial.println("Waiting for C to finish");
-    while (analogRead(tempoPin) < threshold) { testAudioInput.updateActions(); } //let rest finish
+    while (analogRead(tempoPin) < threshold) { } //let rest finish
     //  Serial.println("Final rest finished, now PLAY!!");
     // while (true) {
     //   Serial.println(analogRead(audioInput)); 
