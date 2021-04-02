@@ -323,9 +323,9 @@ void loop() {
         
     }
     
-    while (analogRead(tempoPin) > threshold) { testAudioInput.updateActions(); } //let C finish
+    while (analogRead(tempoPin) > threshold) { } //let C finish
     //  Serial.println("Waiting for C to finish");
-    while (analogRead(tempoPin) < threshold) { testAudioInput.updateActions(); } //let rest finish
+    while (analogRead(tempoPin) < threshold) { } //let rest finish
     //  Serial.println("Final rest finished, now PLAY!!");
     // while (true) {
     //   Serial.println(analogRead(audioInput)); 
