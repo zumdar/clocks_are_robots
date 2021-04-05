@@ -208,14 +208,16 @@ void loop() {
       tempo = 0.5; // Hardcoded tempo for test
       playOutput();
     } else if (mode == HIGH && modeSecond == LOW){
-      // Input Test //TODO: Define Input Test w/ Team
       long startInputTest = millis();
-      while (millis() - startInputTest < 5000) { // Blink w/ envelope for 5 sec
-        if (analogRead(tempoPin) > threshold) {
-          // Turn on Status LED
-        } else {
-          // Turn off Status LED
+      int brightness;
+      while (true) {
+        if (digitalRead(START_BUTTON)) {
+          break;
         }
+        brightness = round(analogRead(tempoPin)*255.0/1023.0);
+        strip.clear();
+        strip.setPixelColor(0, 0, 0, brightness);
+        strip.show();
       }
     }
 
