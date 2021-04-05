@@ -173,6 +173,7 @@ void loop() {
       //read the tempo pot
       tempoRaw = analogRead(tempoPin);
       tempo = song_tempo*float(tempoRaw)/TempoCal;	//constrain the tempo value into something useful
+      tempo = 125;
       Serial.println(tempo);
       
       
@@ -182,16 +183,19 @@ void loop() {
        // set servo rotation for pitch
       pitchServo.write(servoNotes[i_note_index]);
       // metronome servo positioning
-      metronomePos = metronomePos + beats[i_note_index];
-      if (metronomePos >= 36){
-      	metronomePosMapped = map(metronomePos, 36, 72, 128, 64);
+      Serial.print("i_note_index: ");
+      Serial.println(i_note_index);
+      metronomePos = i_note_index;
+      if (metronomePos >= 27){
+      	metronomePosMapped = map(metronomePos, 28, 53, 100, 0);
       }
       else {
-        metronomePosMapped = map(metronomePos, 0, 36, 64, 128);
+        metronomePosMapped = map(metronomePos, 0, 27, 0, 100);
       }
       Serial.print("metronome position: ");
       Serial.println(metronomePosMapped);
       metronomeServo.write(metronomePosMapped);
+//      metronomeServo.write(50); // to calibrate the middle position
       //led strip output
       strip.clear();
       strip.setPixelColor(ledIndexes[i_note_index], ledColors[i_note_index]);         //  Set pixel's color (in RAM)
