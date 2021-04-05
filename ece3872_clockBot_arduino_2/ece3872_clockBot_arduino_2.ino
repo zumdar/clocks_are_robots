@@ -108,6 +108,7 @@ uint32_t high_Ccolor = strip.ColorHSV(65534);
 
 // playOutput Globals
 bool startSong = 0;
+bool skipProcessing = 0;
 bool testOutput = 0;
 bool music = 1;
 bool lights = 1;
@@ -139,6 +140,9 @@ const int playLED = 5;//green LED
 int mode = LOW;
 int modeSecond = LOW;
 
+//Function Prototypes
+void buttonISR(int);
+
 void setup() {
   pinMode(octavePin, INPUT);
   pinMode(tempoPin, INPUT);
@@ -163,7 +167,6 @@ void setup() {
 
 void loop() {
 
-  // TODO: LEDs Green in Init. State
   while (true) { // Do not continue until we see a button press
     Serial.println("Waiting for button press");
     solidColor(strip.ColorHSV(56000, 255,   255)); // Green
@@ -285,7 +288,10 @@ void loop() {
     int state = 0; //E is 3, D is 2, C is 1
     int input; // Input to state machine
 
-    while (!detected) {
+    while (!detected && !skipProcessing) {
+      if (digitalRead(START_BUTTON)) {
+        buttonISR(1);
+      }
       for (int i = 0; i < windowLength; i++) {
         currTime = micros();
         window[i] = analogRead(audioInput); // collect window
@@ -355,6 +361,18 @@ void loop() {
       }
         
     }
+
+    if (skipProcessing) { //Skip determined by buttonISR in either of the tempo detection and time sync loops
+      if (startSong) {
+        strip.clear();
+        strip.setPixelColor(0, 255, 0, 255)
+        strip.show();
+        while(!digitalRead(START_BUTTON)) {}; //Show status lights and then play on next press
+        playOutput();
+      }
+      skipProcessing = false;
+      return; //Go back to init state
+    }
     
     while (analogRead(tempoPin) > threshold) { } //let C finish
     //  Serial.println("Waiting for C to finish");
@@ -381,8 +399,17 @@ void loop() {
   }
 }
 
-void buttonISR() { // Not really an ISR. Saving commented code for more complex test routines
-  startSong = 0;
+void buttonISR(int code = 0) { // Not really an ISR. Saving commented code for more complex test routines
+  if (code == 0) {
+    startSong = 0;
+  } else if (code == 1) {
+    skipProcessing = true;
+    long startPress = millis();
+    while (digitalRead(START_BUTTON)) {}
+    if (millis() - START_BUTTON >= 3000) {
+      startSong = true;
+    }
+  }
   // long currTime = millis();
   // int riseCount = 0;
   // int currLevel = 0;
@@ -449,7 +476,7 @@ void playOutput() {
 
   while (i_note_index < songLength) {
     if (digitalRead(START_BUTTON)) {
-      buttonISR();
+      buttonISR(0);
     }
     if (!startSong) {
       break;
@@ -517,7 +544,13 @@ double getTempo(float samplePeriod) {
   bool startCount = false;
   long cnt = 0;
 
-  while (numRests < 20) {
+  while (numRests < 20 && !skipProcessing) {
+    if (digitalRead(START_BUTTON)) {
+      buttonISR(1);
+      if (startSong) {
+        return 0.3; // Hardcoded tempo in the case of early termination
+      }
+    }
 
     long currTime = micros();
     newData = analogRead(tempoPin);
