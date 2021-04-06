@@ -43,10 +43,9 @@
 #define LED_COUNT 7
 #define BRIGHTNESS 255
 #define SPEAKER_PIN 9
-#define TEST_INPUT 6
+//#define TEST_INPUT 6
 
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800); // Declare NeoPixel strip object:
-Servo pitchServo;  // create servo object to control a pitch servo
 Servo metronomeServo;  // create servo object to control a metronom servo
 
 //INPUT SETUP
@@ -153,7 +152,6 @@ void setup() {
   pinMode(testLED, OUTPUT);
   pinMode(playLED, OUTPUT);
 
-  pitchServo.attach(3);  // attaches the servo on pin 3 to the servo object
   metronomeServo.attach(10);
 
   strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
@@ -170,11 +168,11 @@ void loop() {
   while (true) { // Do not continue until we see a button press
     Serial.println("Waiting for button press");
     solidColor(strip.ColorHSV(56000, 255,   255)); // Green
-    mode = digitalRead(START_BUTTON);
+    mode = !digitalRead(START_BUTTON);
     if (mode == HIGH) {
       long buttonPressStart = millis();
       while(millis() - buttonPressStart < 3000){}; // Functionally the same as delay(3000), but we could define some actions within loop if necessesary
-      modeSecond = digitalRead(START_BUTTON);
+      modeSecond = !digitalRead(START_BUTTON);
       break;
     }
   }
@@ -188,11 +186,11 @@ void loop() {
     while (true) { // Do not continue until we see a button press
       Serial.println("Waiting for input/output");
       solidColor(strip.ColorHSV(10922, 255,   255));
-      mode = digitalRead(START_BUTTON);
+      mode = !digitalRead(START_BUTTON);
       if (mode == HIGH) {
         long buttonPressStart = millis();
         while(millis() - buttonPressStart < 3000){}; // Functionally the same as delay(3000), but we could define some actions within loop if necessesary
-        modeSecond = digitalRead(START_BUTTON);
+        modeSecond = !digitalRead(START_BUTTON);
         break;
       }
     }
@@ -208,26 +206,29 @@ void loop() {
       delay(200);
       solidColor(strip.ColorHSV(10000,   255, 255)); // Blue
       delay(200);
-      tempo = 0.5; // Hardcoded tempo for test
+      tempo = 0.125; // Hardcoded tempo for 
+      startSong = 1;
       playOutput();
     } else if (mode == HIGH && modeSecond == LOW){
+      Serial.println("Input Test");
       long startInputTest = millis();
       int brightness;
       while (true) {
-        if (digitalRead(START_BUTTON)) {
+        if (!digitalRead(START_BUTTON)) {
           break;
         }
-        brightness = round(analogRead(tempoPin)*255.0/1023.0);
+        brightness = round(analogRead((tempoPin) - 360)*255.0/20.0);
         strip.clear();
         strip.setPixelColor(0, 0, 0, brightness);
         strip.show();
+        Serial.println(analogRead(tempoPin));
       }
     }
 
   } else if (mode == HIGH && modeSecond == LOW){
     // normal play mode
     Serial.println("Play mode");
-    while(!digitalRead(START_BUTTON)) {// Loop until next press
+    while(digitalRead(START_BUTTON)) {// Loop until next press
       Serial.println("Waiting for octave select.");
       octave = analogRead(octavePin); //TODO: Map 1024 input values to 6 discrete octave values (0-5 for now)
       if (octave >= 0 && octave < 170) {
@@ -261,6 +262,7 @@ void loop() {
         strip.show();
         octave = 5;
       }
+      Serial.println(octave);
     }
     strip.clear();
     
@@ -365,7 +367,7 @@ void loop() {
     if (skipProcessing) { //Skip determined by buttonISR in either of the tempo detection and time sync loops
       if (startSong) {
         strip.clear();
-        strip.setPixelColor(0, 255, 0, 255)
+        strip.setPixelColor(0, 255, 0, 255);
         strip.show();
         while(!digitalRead(START_BUTTON)) {}; //Show status lights and then play on next press
         playOutput();
@@ -475,7 +477,7 @@ void playOutput() {
   int duration;
 
   while (i_note_index < songLength) {
-    if (digitalRead(START_BUTTON)) {
+    if (!digitalRead(START_BUTTON)) {
       buttonISR(0);
     }
     if (!startSong) {
@@ -519,7 +521,7 @@ void playOutput() {
 
     long currTime = millis();
     while (millis() - currTime < duration) {
-      if (digitalRead(START_BUTTON)) {
+      if (!digitalRead(START_BUTTON)) {
         buttonISR();
         break;
       }
