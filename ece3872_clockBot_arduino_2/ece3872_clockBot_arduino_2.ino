@@ -142,6 +142,10 @@ int modeSecond = LOW;
 
 //Function Prototypes
 void buttonISR(int);
+double getTempo(float);
+int* DFTind(int, float);
+void solidColor(uint32_t);
+void playOutput(void);
 
 //Stepper Motor
 int degree = 1.8;
@@ -239,8 +243,7 @@ void loop() {
         Serial.println(analogRead(tempoPin));
       }
     }
-
-  } else if (mode == HIGH && modeSecond == LOW){
+  } else if (mode == HIGH && modeSecond == LOW) {
     // normal play mode
     Serial.println("Play mode");
     while(digitalRead(START_BUTTON)) {// Loop until next press
@@ -531,7 +534,6 @@ void playOutput() {
       int difference = angle - currAngle;
       myStepper.step(difference/degree);
       currAngle = angle;
-  }
     }
     //led strip output
     if (lights) {
