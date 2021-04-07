@@ -231,6 +231,7 @@ void loop() {
         if (!digitalRead(START_BUTTON)) {
           break;
         }
+        myStepper.step(20);
         brightness = round(analogRead((tempoPin) - 360)*255.0/20.0);
         strip.clear();
         strip.setPixelColor(0, 0, 0, brightness);
@@ -244,6 +245,7 @@ void loop() {
     Serial.println("Play mode");
     while(digitalRead(START_BUTTON)) {// Loop until next press
       Serial.println("Waiting for octave select.");
+      myStepper.step(20);
       octave = analogRead(octavePin); //TODO: Map 1024 input values to 6 discrete octave values (0-5 for now)
       if (octave >= 0 && octave < 170) {
         strip.clear();
