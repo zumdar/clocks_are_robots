@@ -34,6 +34,7 @@
 #include <Adafruit_NeoPixel.h>
 #include <stdio.h>
 #include <math.h>
+#include <Stepper.h>
 
 
 
@@ -142,7 +143,13 @@ int modeSecond = LOW;
 //Function Prototypes
 void buttonISR(int);
 
+//Stepper Motor
+int degree = 1.8;
+int currAngle = 0;  
+Stepper myStepper(200, 4, 5, 6, 7);
+
 void setup() {
+  myStepper.setSpeed(60);
   pinMode(octavePin, INPUT);
   pinMode(tempoPin, INPUT);
   pinMode(audioInput, INPUT);
@@ -208,6 +215,13 @@ void loop() {
       delay(200);
       tempo = 0.125; // Hardcoded tempo for 
       startSong = 1;
+      for (int angle : servoNotes) {
+        int difference = angle - currAngle;
+        Serial.println("clockwise");
+        myStepper.step(difference/degree);
+        delay(50);
+        currAngle = angle;
+      }
       playOutput();
     } else if (mode == HIGH && modeSecond == LOW){
       Serial.println("Input Test");
@@ -509,6 +523,13 @@ void playOutput() {
   //    Serial.print("metronome position: ");
   //    Serial.println(metronomePosMapped);
       metronomeServo.write(metronomePosMapped);
+
+      //Stepper Motor
+      int angle = servoNotes[i_note_index];
+      int difference = angle - currAngle;
+      myStepper.step(difference/degree);
+      currAngle = angle;
+  }
     }
     //led strip output
     if (lights) {
