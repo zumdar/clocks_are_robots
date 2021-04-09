@@ -249,7 +249,7 @@ void loop() {
     Serial.println("Play mode");
     while(digitalRead(START_BUTTON)) {// Loop until next press
       Serial.println("Waiting for octave select.");
-      myStepper.step(10);
+      myStepper.step(5);
       octave = 1024 - analogRead(octavePin); //TODO: Map 1024 input values to 6 discrete octave values (0-5 for now)
       if (octave >= 0 && octave < 170) {
         strip.clear();
@@ -285,30 +285,20 @@ void loop() {
       Serial.println(octave);
     }
     if (octave = 1) {
-        int angle = servoNotes[0];
-        int difference = angle - Dserv;
+        int difference = Cserv - Dserv;
         myStepper.step(difference/degree);
-        currAngle = angle;
       } else if (octave = 2) {
-        int angle = servoNotes[0];
-        int difference = angle - Eserv;
+        int difference = Cserv - Eserv;
         myStepper.step(difference/degree);
-        currAngle = angle;
       } else if (octave = 3) {
-        int angle = servoNotes[0];
-        int difference = angle - Fserv;
+        int difference = Cserv - Fserv;
         myStepper.step(difference/degree);
-        currAngle = angle;
       } else if (octave = 4) {
-        int angle = servoNotes[0];
-        int difference = angle - Gserv;
+        int difference = Cserv - Gserv;
         myStepper.step(difference/degree);
-        currAngle = angle;
       } else if (octave = 5) {
-        int angle = servoNotes[0];
-        int difference = angle - Aserv;
+        int difference = Cserv - Aserv;
         myStepper.step(difference/degree);
-        currAngle = angle;
       }
     redefineNotes();
     strip.clear();
