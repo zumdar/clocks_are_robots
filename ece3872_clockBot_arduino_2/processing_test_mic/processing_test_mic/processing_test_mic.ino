@@ -6,7 +6,7 @@
 //    what pitches it is playing with a servo and leds
 //    and displays the timing with a metronome like penduluum
 // Design Name:   clocks are robots too
-// File Name:     roboclock.ino
+// File Name:     processing_test.ino
 //
 // Inputs:
 //    Start Switch: switch to start playing the song
@@ -18,8 +18,7 @@
 //    Speaker: Used to play the song
 //
 //
-// History:       4 February 2021 - William - File created
-//                1 March 2021 - Solomon - Tempo and Windowing Functionality Added
+// History:      25 March 2021 - Solomon - File Created
 //
 //-----------------------------------------------------
 
@@ -53,9 +52,9 @@ Servo metronomeServo;  // create servo object to control a metronom servo
 int octavePin = A2;
 int tempoPin = A1; // envelope or comparator input
 int audioInput = A0;
-#define threshold 400 // Conventions are bad, this is only temporary. Replace w/ threshold input
+#define threshold 380 // Conventions are bad, this is only temporary. Replace w/ threshold input
 #define START_BUTTON 8
-#define TEST_TEMPO 0.12 // beat time in ms
+#define TEST_TEMPO 0.4 // beat time in ms
 
 //SOUND SETUP
 #define TempoCal 512
@@ -202,10 +201,10 @@ void loop() {
   testAudioInput.start(TEST_TEMPO*1000, true);
   
   tempo = getTempo(1.0/sampleRate);
-  testAudioInput.updateActions();
-  int DFTsize = 128; //Hopefully multiple of two helps speed
+//  testAudioInput.updateActions();
+  int DFTsize = tempo >= 0.15 ? 128 : 96; //Hopefully multiple of two helps speed
   int* FFTindices = DFTind(DFTsize, 1.0/sampleRate);
-  int windowLength = 128;
+  int windowLength = DFTsize;
   int window[windowLength];
   float v[8][3];
   float fftValues[8];
@@ -221,7 +220,7 @@ void loop() {
   while (!detected) {
     for (int i = 0; i < windowLength; i++) {
       currTime = micros();
-      testAudioInput.updateActions();
+//      testAudioInput.updateActions();
       window[i] = analogRead(audioInput); // collect window
 //      for (int* k = FFTindices; k < FFTindices + 4; k++) { // TODO: note how calculating v here is too slow
 //        int f = k - FFTindices;
@@ -242,7 +241,7 @@ void loop() {
       while (micros() - currTime < long(1000000.0/sampleRate)) {} // delay by sample period
     }
 
-//     unsigned long currTime2 = millis(); // Print total calculation time per window
+     unsigned long currTime2 = millis(); // Print total calculation time per window
     // Goertzel calculation of FFT values
     for (int* k = FFTindices; k < FFTindices + 4; k++) {
       int f = k - FFTindices; //index based on frequency
@@ -281,14 +280,14 @@ void loop() {
 
     //Print Values every six loops
     strongFreq[sizeof(strongFreq)/sizeof(int) - 1] = maxInd + 1; //just some notation b/c initial array is all zeroes
-//    if (cnt % 6 == 0) {
-//      for (int i = 0; i < sizeof(strongFreq)/sizeof(int); i++) {
-//        Serial.print(strongFreq[i]); Serial.print(' ');
-//          if (i == sizeof(strongFreq)/sizeof(int) - 1) {
-//            Serial.println("");
-//          }
-//      }
-//    }
+    if (cnt % 6 == 0) {
+      for (int i = 0; i < sizeof(strongFreq)/sizeof(int); i++) {
+        Serial.print(strongFreq[i]); Serial.print(' ');
+          if (i == sizeof(strongFreq)/sizeof(int) - 1) {
+            Serial.println("");
+          }
+      }
+    }
     cnt++;
 
     // State Machine Implementation for Pattern Detection
@@ -322,19 +321,24 @@ void loop() {
     }
       
   }
-  
-  while (analogRead(tempoPin) > threshold) { testAudioInput.updateActions(); } //let C finish
-//  Serial.println("Waiting for C to finish");
-  while (analogRead(tempoPin) < threshold) { testAudioInput.updateActions(); } //let rest finish
-//  Serial.println("Final rest finished, now PLAY!!");
-  while (true) {
-    testAudioInput.updateActions();
-    Serial.println(analogRead(audioInput));
-  }
+
+  Serial.println("Waiting for C to finish");
+  while (analogRead(tempoPin) > threshold) { testAudioInput.updateActions(); }; //let C finish
+  Serial.println("Waiting for rest to finish");
+  currTime = millis();
+  while (millis() - currTime < long(tempo*1000)) { };
+//  while (analogRead(tempoPin) < threshold) { testAudioInput.updateActions(); } //let rest finish
+  Serial.println("Final rest finished, now PLAY!!");
+//  while (true) {
+//    testAudioInput.updateActions();
+//    Serial.println(analogRead(audioInput));
+//  }
   //------------------------------------
   //playing THE SONG
   //------------------------------------
 
+  startSong = 1;
+  playOutput();
   while (true) /// TODO make variable that activates when its time to play
   {
     if (digitalRead(START_BUTTON)) {
@@ -415,24 +419,26 @@ void playOutput() {
   unsigned int mic = 0;
   int i_note_index = 0;
   int duration;
+  long currTime1;
+  long currTime2;
 
   while (i_note_index < songLength) {
+    currTime1 = millis();
     if (digitalRead(START_BUTTON)) {
-      buttonISR();
+//      buttonISR();
     }
     if (!startSong) {
       break;
     }
 
-    Serial.println(tempo);
+//    Serial.println(duration);
 
     mic = analogRead(audioInput);
-    Serial.println(mic);
 
     //play the song
-    duration = beats[i_note_index] * tempo*1000; // in ms
+    duration = beats[i_note_index]*tempo*1000; // in ms
     if (music) {
-      tone(SPEAKER_PIN, notes[i_note_index], duration);
+      tone(SPEAKER_PIN, notes[i_note_index]/2.0, duration);
     }
     
     // metronome servo positioning
@@ -446,7 +452,7 @@ void playOutput() {
         metronomePosMapped = map(metronomePos, 0, 36, 64, 128);
       }
   //    Serial.print("metronome position: ");
-  //    Serial.println(metronomePosMapped);
+  //    Serial.println(metronomePosMapped); 
       metronomeServo.write(metronomePosMapped);
     }
     //led strip output
@@ -457,15 +463,16 @@ void playOutput() {
   //    Serial.print("Note playing: ");
   //    Serial.println(notes[i_note_index]);
     }
+    while (millis() - currTime1 < duration) {};
 
-    long currTime = millis();
-    while (currTime - millis() < duration) {
-      if (digitalRead(START_BUTTON)) {
-        buttonISR();
+    currTime2 = millis();
+    
+    while (millis() - currTime2 < tempo*1000) {
+      if (!digitalRead(START_BUTTON)) {
+//        buttonISR();
         break;
       }
     }
-
     //increment the note counter
     i_note_index += 2; //as delay covers for the rests, we can skip them here
     if (i_note_index >= songLength)
@@ -481,48 +488,142 @@ double getTempo(float samplePeriod) {
   int numRests = 0; // The number of entire rests we have recorded
   unsigned int rests[20];
   unsigned long restSum = 0;
-  int newData;
+  float newData; //TODO: Change back to int
   bool startCount = false;
   long cnt = 0;
+  long currTime;
+  // Moving Average
+  int windowSize = 10;
+  int windowSum = 0;
+  int window[windowSize];
+  int i = 0;
+  // Outlier Detection
+  int mini = 1024;
+  int maxi = 0;
+  int data;
+  float thresh;
+  int outlierRegion = 30;
+  int trueTotal;
 
-//  while (true) {
-//    testAudioInput.updateActions();
+
+  samplePeriod = 1/5000.0;
+
+//  while (true) { // view raw envelope
+//    currTime = micros();
 //    Serial.println(analogRead(tempoPin));
+//    while (micros() - currTime < long(samplePeriod*1000000)) {};
+//    }
+//  while (true) { // view smoothed envelope
+//    currTime = micros();
+//    newData = analogRead(tempoPin);
+//    if (i < windowSize) {
+//      window[i] = newData;
+//      windowSum += window[i];
+//      i++;
+//    } else {
+//      windowSum -= window[0];
+//      for (int j = 1; j < windowSize; j++) {
+//        window[j - 1] = window[j];
+//      }
+//      window[windowSize - 1] = newData;
+//      windowSum = windowSum + window[windowSize -1];
+//      Serial.println(windowSum/(float)windowSize);
+//    }
+//    while (micros() - currTime < long(samplePeriod*1000000)) {};
 //  }
-
-  while (numRests < 20) {
-
-    testAudioInput.updateActions();
-    
-    long currTime = micros();
-    newData = analogRead(tempoPin);
-    if (cnt % round(1/samplePeriod) == 0) {
-//      Serial.println(newData);
+  
+  currTime = micros(); // Determine threshold by noise
+  while (micros() - currTime < long(10000000*3*samplePeriod)) {
+    data = analogRead(tempoPin);
+    if (data > maxi) {
+      maxi = data;
     }
-    cnt++;
-    if (newData < threshold) {
-      if (startCount) {
-        restCount++;
+    if (data < mini) {
+      mini = data;
+    }
+  }
+  thresh = mini + 1.5*(maxi - mini);
+  Serial.println(thresh);
+  delay(1500);
+  while (true) {
+    numRests = 0;
+    outlierRegion = 30;
+    while (numRests < 20) {  
+      currTime = micros();
+        
+      newData = analogRead(tempoPin);
+      // Moving average implementation
+      if (i < windowSize) {
+        window[i] = newData;
+        windowSum += window[i];
+        i++;
+      } else {
+        windowSum -= window[0];
+        for (int j = 1; j < windowSize; j++) {
+          window[j - 1] = window[j];
+        }
       }
-    } else if (restCount) { // rising edge in envelope
-      rests[numRests] = restCount;
-      numRests++;
-      restCount = 0;
-    } else {
-      startCount = true;
+      window[windowSize - 1] = newData;
+      windowSum = windowSum + window[windowSize - 1];
+      newData = windowSum/(2*(float)windowSize);
+  
+  //    if (cnt % round(1/samplePeriod) == 0) { // once per second
+  //      Serial.println(numRests);
+  //    }
+      cnt++;
+  //    Serial.println(newData);
+
+      // Decision block based on level of averaged input
+      if (newData <= thresh) { //if (newData < threshold)
+        if (startCount) {
+          restCount++;
+          if (restCount == 1) {
+  //          Serial.println(150);
+          }
+        }
+      } else if (restCount) { // rising edge in envelope // else if (restCount) // && (newData - oldData >= 15)
+        if (restCount > outlierRegion) {
+          rests[numRests] = restCount;
+          numRests++;
+        }
+        restCount = 0;
+  //      Serial.println(650);
+      } else {
+        startCount = true;
+      }
+      
+      while (micros() - currTime < long(samplePeriod*1000000)) {} // delay statement to make sure we're sampling as expected
     }
-    while (micros() - currTime < long(samplePeriod*1000000)) {} // delay statement to make sure we're sampling as expected
+  
+    // Find max of collected rest periods, and eliminate outliers determined by some percentage of the max
+    outlierRegion = rests[0];
+    for (int i = 1; i < 20; i++) {
+      if (rests[i] > outlierRegion) {
+        outlierRegion = rests[i];
+      }
+    }
+    outlierRegion = ceil(outlierRegion*0.3);
+    trueTotal = 0;
+    restSum = 0;
+    for (int i = 1; i < 20; i++) {
+      if (rests[i] > outlierRegion) {
+        restSum += rests[i];
+        Serial.println(rests[i]);
+        trueTotal++;
+      }
+    }
+
+    if (trueTotal >= 5) {
+      break;
+    }
   }
 
-  for (int i = 0; i < 20; i++) {
-    Serial.print(rests[i]); Serial.print(' ');
-    restSum += rests[i];
-  }
   Serial.println(restSum);
  
-  Serial.println((rests[0] + rests[1] + rests[2])/20);
-  double tempo = samplePeriod*(restSum)/20.0; //avg num of rest_samples * sample_period = tempo in sec
+  double tempo = samplePeriod*(restSum)/(float)trueTotal; //avg num of rest_samples * sample_period = tempo in sec
+  Serial.print("Tempo: ");
   Serial.println(tempo, 5);
+  delay(1000);
   return tempo;
 }
 
