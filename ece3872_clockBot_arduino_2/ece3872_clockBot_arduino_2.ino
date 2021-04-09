@@ -528,7 +528,7 @@ void playOutput() {
   int i_note_index = 0;
   int duration;
   long metronomeTimer;
-  int metronomeMovement;
+  int metronomeMovement = 0;
 
   while (i_note_index < songLength) {
     if (!digitalRead(START_BUTTON)) {
@@ -553,33 +553,36 @@ void playOutput() {
     // metronome servo positioning penduluum
 
     //new metronome code
-    if (motors) {
-      //71 beats in song
-      if (i_note_index == 0) {
-        metronomeTimer = millis();
-      }
-      if (i_note_index < 22) {
-        metronomeMovement = 2;
-      } else {
-        metronomeMovement = -2;
-      }
-      if (metronomeTimer > tempo*1000) {
-        metronomeServo.write(metronomeMovement);
-        metronomeTimer = millis();
-      }
+//    if (motors) {
+//      //71 beats in song
+//      if (i_note_index == 0) {
+//        metronomeTimer = millis();
+//        metronomeMovement = 0;
+//      }
+//      if (i_note_index < 25) {
+//        metronomeMovement += 1;
+//      } else {
+//        metronomeMovement -= 1;
+//      }
+//      if (metronomeTimer > tempo*100) {
+//        Serial.print("Angle: ");
+//        Serial.println(metronomeMovement);
+//        metronomeServo.write(metronomeMovement);
+//        metronomeTimer = millis();
+//      }
 
       //old metronome code
       
-//      metronomePos = i_note_index;
-//      if (metronomePos >= 27) {
-//        metronomePosMapped = map(metronomePos, 28, 53, 100, 0);
-//      }
-//      else {
-//        metronomePosMapped = map(metronomePos, 0, 27, 0, 100);
-//      }
-//      //    Serial.print("metronome position: ");
-//      //    Serial.println(metronomePosMapped);
-//      metronomeServo.write(metronomePosMapped);
+      metronomePos = i_note_index;
+      if (metronomePos >= 27) {
+        metronomePosMapped = map(metronomePos, 28, 53, 100, 0);
+      }
+      else {
+        metronomePosMapped = map(metronomePos, 0, 27, 0, 100);
+      }
+      //    Serial.print("metronome position: ");
+      //    Serial.println(metronomePosMapped);
+      metronomeServo.write(metronomePosMapped);
 
       //Stepper Motor
       int angle = servoNotes[i_note_index];
@@ -602,6 +605,24 @@ void playOutput() {
         buttonISR();
         break;
       }
+//      //71 beats in song
+//      if (i_note_index == 0) {
+//        metronomeTimer = millis();
+//        metronomeMovement = 0;
+//      }
+//      if (i_note_index < 25) {
+//        metronomeMovement += 1;
+//      } else {
+//        metronomeMovement -= 1;
+//      }
+//      if (millis() - metronomeTimer > tempo*1000) {
+//        Serial.print("Rest Length: ");
+//        Serial.println(tempo*1000);
+//        Serial.print("Angle: ");
+//        Serial.println(metronomeMovement);
+//        metronomeServo.write(metronomeMovement);
+//        metronomeTimer = millis();
+//      }
     }
 
     //increment the note counter
