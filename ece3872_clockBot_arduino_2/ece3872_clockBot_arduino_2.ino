@@ -285,22 +285,23 @@ void loop() {
       }
       Serial.println(octave);
     }
-    if (octave = 1) {
+    if (octave == 1) {
         int difference = Cserv - Dserv;
         myStepper.step(difference/degree);
-      } else if (octave = 2) {
+      } else if (octave == 2) {
         int difference = Cserv - Eserv;
         myStepper.step(difference/degree);
-      } else if (octave = 3) {
+      } else if (octave == 3) {
         int difference = Cserv - Fserv;
         myStepper.step(difference/degree);
-      } else if (octave = 4) {
+      } else if (octave == 4) {
         int difference = Cserv - Gserv;
         myStepper.step(difference/degree);
-      } else if (octave = 5) {
+      } else if (octave == 5) {
         int difference = Cserv - Aserv;
         myStepper.step(difference/degree);
       }
+    currAngle = 0;
     redefineNotes();
     strip.clear();
 
@@ -543,7 +544,7 @@ void playOutput() {
     // metronome servo positioning penduluum
 
     //new metronome code
-//    if (motors) {
+    if (motors) {
 //      //71 beats in song
 //      if (i_note_index == 0) {
 //        metronomeTimer = millis();
