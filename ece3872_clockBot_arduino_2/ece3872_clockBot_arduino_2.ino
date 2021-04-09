@@ -240,6 +240,7 @@ void loop() {
         strip.setPixelColor(6, brightness);
         strip.setPixelColor(7, brightness);
         strip.setPixelColor(8, brightness);
+        strip.show();
         Serial.println(analogRead(tempoPin));
       }
     }
