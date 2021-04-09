@@ -235,11 +235,16 @@ void loop() {
         if (!digitalRead(START_BUTTON)) {
           break;
         }
-        myStepper.step(20);
-        brightness = round(analogRead((tempoPin) - 360)*255.0/20.0);
-        strip.clear();
-        strip.setPixelColor(0, 0, 0, brightness);
-        strip.show();
+        brightness = round((analogRead(tempoPin) - 360)*255.0/20.0);
+        strip.setPixelColor(0, brightness);
+        strip.setPixelColor(1, brightness);
+        strip.setPixelColor(2, brightness);
+        strip.setPixelColor(3, brightness);
+        strip.setPixelColor(4, brightness);
+        strip.setPixelColor(5, brightness);
+        strip.setPixelColor(6, brightness);
+        strip.setPixelColor(7, brightness);
+        strip.setPixelColor(8, brightness);
         Serial.println(analogRead(tempoPin));
       }
     }
