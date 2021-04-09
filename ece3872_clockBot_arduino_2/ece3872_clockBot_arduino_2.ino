@@ -242,6 +242,7 @@ void loop() {
         strip.setPixelColor(8, brightness);
         strip.show();
         Serial.println(analogRead(tempoPin));
+        while(millis() - startInputTest < 500) {};
       }
     }
   } else if (mode == HIGH && modeSecond == LOW) {
