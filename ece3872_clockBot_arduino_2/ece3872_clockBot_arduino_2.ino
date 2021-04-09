@@ -219,6 +219,7 @@ void loop() {
       delay(200);
       tempo = 0.125; // Hardcoded tempo for 
       startSong = 1;
+      playOutput();
       for (int angle : servoNotes) {
         int difference = angle - currAngle;
         Serial.println("clockwise");
@@ -226,7 +227,6 @@ void loop() {
         delay(50);
         currAngle = angle;
       }
-      playOutput();
     } else if (mode == HIGH && modeSecond == LOW){
       Serial.println("Input Test");
       long startInputTest = millis();
@@ -518,12 +518,12 @@ void playOutput() {
     // metronome servo positioning
     if (motors) {
       //TODO: Include stepper motor (clock hand) positioning
-      metronomePos = metronomePos + beats[i_note_index];
-      if (metronomePos >= 36) {
-        metronomePosMapped = map(metronomePos, 36, 72, 128, 64);
+      metronomePos = i_note_index;
+      if (metronomePos >= 27){
+        metronomePosMapped = map(metronomePos, 28, 53, 100, 0);
       }
       else {
-        metronomePosMapped = map(metronomePos, 0, 36, 64, 128);
+        metronomePosMapped = map(metronomePos, 0, 27, 0, 100);
       }
   //    Serial.print("metronome position: ");
   //    Serial.println(metronomePosMapped);
