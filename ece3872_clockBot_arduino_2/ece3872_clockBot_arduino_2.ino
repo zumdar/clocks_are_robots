@@ -156,14 +156,7 @@ void setup() {
   pinMode(audioInput, INPUT);
   pinMode(START_BUTTON, INPUT);
   pinMode(SPEAKER_PIN, OUTPUT);
-<<<<<<< HEAD
-
-  pinMode(testLED, OUTPUT);
-  pinMode(playLED, OUTPUT);
-=======
   
->>>>>>> e4e5da3d2dab404c1a3eaefe311cb3a43f98d7bd
-
   metronomeServo.attach(10);
 
   strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
@@ -236,12 +229,7 @@ void loop() {
         if (!digitalRead(START_BUTTON)) {
           break;
         }
-<<<<<<< HEAD
-        myStepper.step(20);
-        brightness = round(analogRead((tempoPin) - 360) * 255.0 / 20.0);
         strip.clear();
-        strip.setPixelColor(0, 0, 0, brightness);
-=======
         brightness = round((analogRead(tempoPin) - 360)*255.0/20.0);
         strip.setPixelColor(0, brightness);
         strip.setPixelColor(1, brightness);
@@ -252,7 +240,6 @@ void loop() {
         strip.setPixelColor(6, brightness);
         strip.setPixelColor(7, brightness);
         strip.setPixelColor(8, brightness);
->>>>>>> e4e5da3d2dab404c1a3eaefe311cb3a43f98d7bd
         strip.show();
         Serial.println(analogRead(tempoPin));
         while(millis() - startInputTest < 500) {};
@@ -540,6 +527,8 @@ void playOutput() {
   unsigned int mic = 0;
   int i_note_index = 0;
   int duration;
+  long metronomeTimer;
+  int metronomeMovement;
 
   while (i_note_index < songLength) {
     if (!digitalRead(START_BUTTON)) {
@@ -558,11 +547,7 @@ void playOutput() {
     //play the song
     duration = beats[i_note_index] * tempo * 1000; // in ms
     if (music) {
-<<<<<<< HEAD
-      tone(SPEAKER_PIN, notes[i_note_index] * 2, duration); // TODO: define w/ Team what octave we should play in
-=======
       tone(SPEAKER_PIN, *notes[i_note_index]*2, duration); // TODO: define w/ Team what octave we should play in
->>>>>>> e4e5da3d2dab404c1a3eaefe311cb3a43f98d7bd
     }
 
     // metronome servo positioning penduluum
@@ -570,13 +555,15 @@ void playOutput() {
     //new metronome code
     if (motors) {
       //71 beats in song
-      metronomeTimer = millis();
+      if (i_note_index == 0) {
+        metronomeTimer = millis();
+      }
       if (i_note_index < 22) {
         metronomeMovement = 2;
       } else {
         metronomeMovement = -2;
       }
-      if (metronomeTimer > tempo) {
+      if (metronomeTimer > tempo*1000) {
         metronomeServo.write(metronomeMovement);
         metronomeTimer = millis();
       }
