@@ -75,13 +75,13 @@ float rest = 0;
 
 // servo rotations based on notes
 #define Cserv 0
-#define Dserv 37
-#define Eserv 73
-#define Fserv 110
-#define Gserv 146
-#define Aserv 183
-#define Bserv 219
-#define high_Cserv 255
+#define Dserv 29
+#define Eserv 57
+#define Fserv 86
+#define Gserv 114
+#define Aserv 143
+#define Bserv 171
+#define high_Cserv 200
 
 // led index based on notes
 #define Cled 0
