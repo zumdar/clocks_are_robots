@@ -567,37 +567,123 @@ double getTempo(float samplePeriod) {
   int numRests = 0; // The number of entire rests we have recorded
   unsigned int rests[20];
   unsigned long restSum = 0;
-  int newData;
+  float newData; //TODO: Change back to int
   bool startCount = false;
   long cnt = 0;
+  long currTime;
+  // Moving Average
+  int windowSize = 10;
+  int windowSum = 0;
+  int window[windowSize];
+  int i = 0;
+  // Outlier Detection
+  int mini = 1024;
+  int maxi = 0;
+  int data;
+  float thresh;
+  int outlierRegion = 30;
+  int trueTotal;
 
-  while (numRests < 20 && !skipProcessing) {
-    if (digitalRead(START_BUTTON)) {
-      buttonISR(1);
-      if (startSong) {
+  samplePeriod = 1/5000.0;
+
+  currTime = micros(); // Determine threshold by noise
+  while (micros() - currTime < long(10000000*3*samplePeriod)) {
+    data = analogRead(tempoPin);
+    if (data > maxi) {
+      maxi = data;
+    }
+    if (data < mini) {
+      mini = data;
+    }
+  }
+  thresh = mini + 1.5*(maxi - mini);
+  Serial.println(thresh);
+  delay(1500);
+  while (true) {
+    numRests = 0;
+    outlierRegion = 30;
+    while (numRests < 20 && !skipProcessing) {
+      if (digitalRead(START_BUTTON)) {
+        buttonISR(1);
+        if (startSong) {
         return 0.3; // Hardcoded tempo in the case of early termination
+        }
+      }
+      currTime = micros();
+        
+      newData = analogRead(tempoPin);
+      // Moving average implementation
+      if (i < windowSize) {
+        window[i] = newData;
+        windowSum += window[i];
+        i++;
+      } else {
+        windowSum -= window[0];
+        for (int j = 1; j < windowSize; j++) {
+          window[j - 1] = window[j];
+        }
+      }
+      window[windowSize - 1] = newData;
+      windowSum = windowSum + window[windowSize - 1];
+      newData = windowSum/(2*(float)windowSize);
+  
+  //    if (cnt % round(1/samplePeriod) == 0) { // once per second
+  //      Serial.println(numRests);
+  //    }
+      cnt++;
+  //    Serial.println(newData);
+
+      // Decision block based on level of averaged input
+      if (newData <= thresh) { //if (newData < threshold)
+        if (startCount) {
+          restCount++;
+          if (restCount == 1) {
+  //          Serial.println(150);
+          }
+        }
+      } else if (restCount) { // rising edge in envelope // else if (restCount) // && (newData - oldData >= 15)
+        if (restCount > outlierRegion) {
+          rests[numRests] = restCount;
+          numRests++;
+        }
+        restCount = 0;
+  //      Serial.println(650);
+      } else {
+        startCount = true;
+      }
+      
+      while (micros() - currTime < long(samplePeriod*1000000)) {} // delay statement to make sure we're sampling as expected
+     }
+  
+    // Find max of collected rest periods, and eliminate outliers determined by some percentage of the max
+    outlierRegion = rests[0];
+    for (int i = 1; i < 20; i++) {
+      if (rests[i] > outlierRegion) {
+        outlierRegion = rests[i];
+      }
+    }
+    outlierRegion = ceil(outlierRegion*0.3);
+    trueTotal = 0;
+    restSum = 0;
+    for (int i = 1; i < 20; i++) {
+      if (rests[i] > outlierRegion) {
+        restSum += rests[i];
+        Serial.println(rests[i]);
+        trueTotal++;
       }
     }
 
-    long currTime = micros();
-    newData = analogRead(tempoPin);
-
-    if (newData < threshold) {
-      if (startCount) {
-        restCount++;
-      }
-    } else if (restCount) { // rising edge in envelope
-      rests[numRests] = restCount;
-      numRests++;
-      restCount = 0;
-    } else {
-      startCount = true;
+    if (trueTotal >= 5) {
+      break;
     }
-    while (micros() - currTime < long(samplePeriod*1000000)) {} // delay statement to make sure we're sampling as expected
   }
 
-  double tempo = samplePeriod*(restSum)/20.0; //avg num of rest_samples * sample_period = tempo in sec
+  Serial.println(restSum);
+ 
+  double tempo = samplePeriod*(restSum)/(float)trueTotal; //avg num of rest_samples * sample_period = tempo in sec
+  Serial.print("Tempo: ");
   Serial.println(tempo, 5);
+  delay(1000);
   return tempo;
 }
 
