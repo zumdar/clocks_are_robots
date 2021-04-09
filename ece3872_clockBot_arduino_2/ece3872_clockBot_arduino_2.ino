@@ -34,6 +34,7 @@
 #include <Adafruit_NeoPixel.h>
 #include <stdio.h>
 #include <math.h>
+#include <Stepper.h>
 
 
 
@@ -141,8 +142,18 @@ int modeSecond = LOW;
 
 //Function Prototypes
 void buttonISR(int);
+double getTempo(float);
+int* DFTind(int, float);
+void solidColor(uint32_t);
+void playOutput(void);
+
+//Stepper Motor
+int degree = 1.8;
+int currAngle = 0;  
+Stepper myStepper(200, 4, 5, 6, 7);
 
 void setup() {
+  myStepper.setSpeed(60);
   pinMode(octavePin, INPUT);
   pinMode(tempoPin, INPUT);
   pinMode(audioInput, INPUT);
@@ -209,6 +220,13 @@ void loop() {
       tempo = 0.125; // Hardcoded tempo for 
       startSong = 1;
       playOutput();
+      for (int angle : servoNotes) {
+        int difference = angle - currAngle;
+        Serial.println("clockwise");
+        myStepper.step(difference/degree);
+        delay(50);
+        currAngle = angle;
+      }
     } else if (mode == HIGH && modeSecond == LOW){
       Serial.println("Input Test");
       long startInputTest = millis();
@@ -217,6 +235,7 @@ void loop() {
         if (!digitalRead(START_BUTTON)) {
           break;
         }
+        myStepper.step(20);
         brightness = round(analogRead((tempoPin) - 360)*255.0/20.0);
         strip.clear();
         strip.setPixelColor(0, 0, 0, brightness);
@@ -224,12 +243,12 @@ void loop() {
         Serial.println(analogRead(tempoPin));
       }
     }
-
-  } else if (mode == HIGH && modeSecond == LOW){
+  } else if (mode == HIGH && modeSecond == LOW) {
     // normal play mode
     Serial.println("Play mode");
     while(digitalRead(START_BUTTON)) {// Loop until next press
       Serial.println("Waiting for octave select.");
+      myStepper.step(10);
       octave = analogRead(octavePin); //TODO: Map 1024 input values to 6 discrete octave values (0-5 for now)
       if (octave >= 0 && octave < 170) {
         strip.clear();
@@ -499,16 +518,22 @@ void playOutput() {
     // metronome servo positioning
     if (motors) {
       //TODO: Include stepper motor (clock hand) positioning
-      metronomePos = metronomePos + beats[i_note_index];
-      if (metronomePos >= 36) {
-        metronomePosMapped = map(metronomePos, 36, 72, 128, 64);
+      metronomePos = i_note_index;
+      if (metronomePos >= 27){
+        metronomePosMapped = map(metronomePos, 28, 53, 100, 0);
       }
       else {
-        metronomePosMapped = map(metronomePos, 0, 36, 64, 128);
+        metronomePosMapped = map(metronomePos, 0, 27, 0, 100);
       }
   //    Serial.print("metronome position: ");
   //    Serial.println(metronomePosMapped);
       metronomeServo.write(metronomePosMapped);
+
+      //Stepper Motor
+      int angle = servoNotes[i_note_index];
+      int difference = angle - currAngle;
+      myStepper.step(difference/degree);
+      currAngle = angle;
     }
     //led strip output
     if (lights) {
@@ -542,37 +567,116 @@ double getTempo(float samplePeriod) {
   int numRests = 0; // The number of entire rests we have recorded
   unsigned int rests[20];
   unsigned long restSum = 0;
-  int newData;
+  float newData; //TODO: Change back to int
   bool startCount = false;
   long cnt = 0;
+  long currTime;
+  // Moving Average
+  int windowSize = 10;
+  int windowSum = 0;
+  int window[windowSize];
+  int i = 0;
+  // Outlier Detection
+  int mini = 1024;
+  int maxi = 0;
+  int data;
+  float thresh;
+  int outlierRegion = 30;
+  int trueTotal;
 
-  while (numRests < 20 && !skipProcessing) {
-    if (digitalRead(START_BUTTON)) {
-      buttonISR(1);
-      if (startSong) {
+  samplePeriod = 1/5000.0;
+
+  currTime = micros(); // Determine threshold by noise
+  while (micros() - currTime < long(10000000*3*samplePeriod)) {
+    data = analogRead(tempoPin);
+    if (data > maxi) {
+      maxi = data;
+    }
+    if (data < mini) {
+      mini = data;
+    }
+  }
+  thresh = mini + 1.5*(maxi - mini);
+  Serial.println(thresh);
+  while (true) {
+    numRests = 0;
+    outlierRegion = 30;
+    while (numRests < 20 && !skipProcessing) {
+      if (digitalRead(START_BUTTON)) {
+        buttonISR(1);
+        if (startSong) {
         return 0.3; // Hardcoded tempo in the case of early termination
+        }
+      }
+      currTime = micros();
+        
+      newData = analogRead(tempoPin);
+      // Moving average implementation
+      if (i < windowSize) {
+        window[i] = newData;
+        windowSum += window[i];
+        i++;
+      } else {
+        windowSum -= window[0];
+        for (int j = 1; j < windowSize; j++) {
+          window[j - 1] = window[j];
+        }
+      }
+      window[windowSize - 1] = newData;
+      windowSum = windowSum + window[windowSize - 1];
+      newData = windowSum/(2*(float)windowSize);
+  
+      cnt++;
+
+      // Decision block based on level of averaged input
+      if (newData <= thresh) { //if (newData < threshold)
+        if (startCount) {
+          restCount++;
+          if (restCount == 1) {
+          }
+        }
+      } else if (restCount) { // rising edge in envelope // else if (restCount) // && (newData - oldData >= 15)
+        if (restCount > outlierRegion) {
+          rests[numRests] = restCount;
+          numRests++;
+        }
+        restCount = 0;
+      } else {
+        startCount = true;
+      }
+      
+      while (micros() - currTime < long(samplePeriod*1000000)) {} // delay statement to make sure we're sampling as expected
+     }
+  
+    // Find max of collected rest periods, and eliminate outliers determined by some percentage of the max
+    outlierRegion = rests[0];
+    for (int i = 1; i < 20; i++) {
+      if (rests[i] > outlierRegion) {
+        outlierRegion = rests[i];
+      }
+    }
+    outlierRegion = ceil(outlierRegion*0.3);
+    trueTotal = 0;
+    restSum = 0;
+    for (int i = 1; i < 20; i++) {
+      if (rests[i] > outlierRegion) {
+        restSum += rests[i];
+        Serial.println(rests[i]);
+        trueTotal++;
       }
     }
 
-    long currTime = micros();
-    newData = analogRead(tempoPin);
-
-    if (newData < threshold) {
-      if (startCount) {
-        restCount++;
-      }
-    } else if (restCount) { // rising edge in envelope
-      rests[numRests] = restCount;
-      numRests++;
-      restCount = 0;
-    } else {
-      startCount = true;
+    if (trueTotal >= 5) {
+      break;
     }
-    while (micros() - currTime < long(samplePeriod*1000000)) {} // delay statement to make sure we're sampling as expected
   }
 
-  double tempo = samplePeriod*(restSum)/20.0; //avg num of rest_samples * sample_period = tempo in sec
+  Serial.println(restSum);
+ 
+  double tempo = samplePeriod*(restSum)/(float)trueTotal; //avg num of rest_samples * sample_period = tempo in sec
+  Serial.print("Tempo: ");
   Serial.println(tempo, 5);
+  delay(1000);
   return tempo;
 }
 
