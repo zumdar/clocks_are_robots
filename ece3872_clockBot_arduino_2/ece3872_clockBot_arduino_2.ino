@@ -284,6 +284,32 @@ void loop() {
       }
       Serial.println(octave);
     }
+    if (octave = 1) {
+        int angle = servoNotes[0];
+        int difference = angle - Dserv;
+        myStepper.step(difference/degree);
+        currAngle = angle;
+      } else if (octave = 2) {
+        int angle = servoNotes[0];
+        int difference = angle - Eserv;
+        myStepper.step(difference/degree);
+        currAngle = angle;
+      } else if (octave = 3) {
+        int angle = servoNotes[0];
+        int difference = angle - Fserv;
+        myStepper.step(difference/degree);
+        currAngle = angle;
+      } else if (octave = 4) {
+        int angle = servoNotes[0];
+        int difference = angle - Gserv;
+        myStepper.step(difference/degree);
+        currAngle = angle;
+      } else if (octave = 5) {
+        int angle = servoNotes[0];
+        int difference = angle - Aserv;
+        myStepper.step(difference/degree);
+        currAngle = angle;
+      }
     redefineNotes();
     strip.clear();
     
