@@ -598,7 +598,6 @@ double getTempo(float samplePeriod) {
   }
   thresh = mini + 1.5*(maxi - mini);
   Serial.println(thresh);
-  delay(1500);
   while (true) {
     numRests = 0;
     outlierRegion = 30;
@@ -627,18 +626,13 @@ double getTempo(float samplePeriod) {
       windowSum = windowSum + window[windowSize - 1];
       newData = windowSum/(2*(float)windowSize);
   
-  //    if (cnt % round(1/samplePeriod) == 0) { // once per second
-  //      Serial.println(numRests);
-  //    }
       cnt++;
-  //    Serial.println(newData);
 
       // Decision block based on level of averaged input
       if (newData <= thresh) { //if (newData < threshold)
         if (startCount) {
           restCount++;
           if (restCount == 1) {
-  //          Serial.println(150);
           }
         }
       } else if (restCount) { // rising edge in envelope // else if (restCount) // && (newData - oldData >= 15)
@@ -647,7 +641,6 @@ double getTempo(float samplePeriod) {
           numRests++;
         }
         restCount = 0;
-  //      Serial.println(650);
       } else {
         startCount = true;
       }
