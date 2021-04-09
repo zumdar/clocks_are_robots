@@ -60,19 +60,18 @@ int audioInput = A0;
 #define TempoCal 512
 #define TempoPotMax 1023
 #define PwmMax 255
-#define rest 0
 int octave = 4; //Default 4 but should change
 
 //Music Notes based on Octave--
-#define C 16.3516*pow(2,octave)
-#define D 18.35405*pow(2,octave)
-#define E 20.60172*pow(2,octave)
-#define F 21.82676*pow(2,octave)
-#define G 24.49971*pow(2,octave)
-#define A 27.5*pow(2,octave)
-#define B 30.86771*pow(2,octave)
-#define high_C 32.70320*pow(2,octave)
-#define rest 0
+float C = 16.3516*pow(2,octave);
+float D = 18.35405*pow(2,octave);
+float E = 20.60172*pow(2,octave);
+float F = 21.82676*pow(2,octave);
+float G = 24.49971*pow(2,octave);
+float A = 27.5*pow(2,octave);
+float B = 30.86771*pow(2,octave);
+float high_C = 32.70320*pow(2,octave);
+float rest = 0;
 
 // servo rotations based on notes
 #define Cserv 0
@@ -121,7 +120,8 @@ double tempo;
 
 //Row Row Row Your Boat
 int songLength = 54;
-double notes[] = {C, rest, C, rest, C, rest, D, rest, E, rest, E, rest, D, rest, E, rest, F, rest, G, rest, high_C, rest, high_C, rest, high_C, rest, G, rest, G, rest, G, rest, E, rest, E, rest, E, rest, C, rest, C, rest, C, rest, G, rest, F, rest, E, rest, D, rest, C, rest};
+//double notes[] = {C, rest, C, rest, C, rest, D, rest, E, rest, E, rest, D, rest, E, rest, F, rest, G, rest, high_C, rest, high_C, rest, high_C, rest, G, rest, G, rest, G, rest, E, rest, E, rest, E, rest, C, rest, C, rest, C, rest, G, rest, F, rest, E, rest, D, rest, C, rest};
+float* notes[] = {&C, &rest, &C, &rest, &C, &rest, &D, &rest, &E, &rest, &E, &rest, &D, &rest, &E, &rest, &F, &rest, &G, &rest, &high_C, &rest, &high_C, &rest, &high_C, &rest, &G, &rest, &G, &rest, &G, &rest, &E, &rest, &E, &rest, &E, &rest, &C, &rest, &C, &rest, &C, &rest, &G, &rest, &F, &rest, &E, &rest, &D, &rest, &C, &rest};
 int beats[] = {2, 1, 2, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 5, 1};
 
 //int songLength = 28;
@@ -134,9 +134,6 @@ int ledIndexes[] = {Cled, Cled, Cled, Cled, Cled, Cled, Dled, Dled, Eled, Eled, 
 uint32_t ledColors[] = {Ccolor, Ccolor, Ccolor, Ccolor, Ccolor, Ccolor, Dcolor, Dcolor, Ecolor, Ecolor, Ecolor, Ecolor, Dcolor, Dcolor, Ecolor, Ecolor, Fcolor, Fcolor, Gcolor, Gcolor, high_Ccolor, high_Ccolor, high_Ccolor, high_Ccolor, high_Ccolor, high_Ccolor, Gcolor, Gcolor, Gcolor, Gcolor, Gcolor, Gcolor, Ecolor, Ecolor, Ecolor, Ecolor, Ecolor, Ecolor, Ccolor, Ccolor, Ccolor, Ccolor, Ccolor, Ccolor, Gcolor, Gcolor, Fcolor, Fcolor, Ecolor, Ecolor, Dcolor, Dcolor, Ccolor, Ccolor};
 
 //Test mode
-const int testLED = 4;//yellow LED
-const int playLED = 5;//green LED
-
 int mode = LOW;
 int modeSecond = LOW;
 
@@ -159,9 +156,13 @@ void setup() {
   pinMode(audioInput, INPUT);
   pinMode(START_BUTTON, INPUT);
   pinMode(SPEAKER_PIN, OUTPUT);
+<<<<<<< HEAD
 
   pinMode(testLED, OUTPUT);
   pinMode(playLED, OUTPUT);
+=======
+  
+>>>>>>> e4e5da3d2dab404c1a3eaefe311cb3a43f98d7bd
 
   metronomeServo.attach(10);
 
@@ -235,10 +236,23 @@ void loop() {
         if (!digitalRead(START_BUTTON)) {
           break;
         }
+<<<<<<< HEAD
         myStepper.step(20);
         brightness = round(analogRead((tempoPin) - 360) * 255.0 / 20.0);
         strip.clear();
         strip.setPixelColor(0, 0, 0, brightness);
+=======
+        brightness = round((analogRead(tempoPin) - 360)*255.0/20.0);
+        strip.setPixelColor(0, brightness);
+        strip.setPixelColor(1, brightness);
+        strip.setPixelColor(2, brightness);
+        strip.setPixelColor(3, brightness);
+        strip.setPixelColor(4, brightness);
+        strip.setPixelColor(5, brightness);
+        strip.setPixelColor(6, brightness);
+        strip.setPixelColor(7, brightness);
+        strip.setPixelColor(8, brightness);
+>>>>>>> e4e5da3d2dab404c1a3eaefe311cb3a43f98d7bd
         strip.show();
         Serial.println(analogRead(tempoPin));
       }
@@ -249,7 +263,7 @@ void loop() {
     while (digitalRead(START_BUTTON)) { // Loop until next press
       Serial.println("Waiting for octave select.");
       myStepper.step(10);
-      octave = analogRead(octavePin); //TODO: Map 1024 input values to 6 discrete octave values (0-5 for now)
+      octave = 1024 - analogRead(octavePin); //TODO: Map 1024 input values to 6 discrete octave values (0-5 for now)
       if (octave >= 0 && octave < 170) {
         strip.clear();
         strip.setPixelColor(0, Ccolor);
@@ -283,6 +297,33 @@ void loop() {
       }
       Serial.println(octave);
     }
+    if (octave = 1) {
+        int angle = servoNotes[0];
+        int difference = angle - Dserv;
+        myStepper.step(difference/degree);
+        currAngle = angle;
+      } else if (octave = 2) {
+        int angle = servoNotes[0];
+        int difference = angle - Eserv;
+        myStepper.step(difference/degree);
+        currAngle = angle;
+      } else if (octave = 3) {
+        int angle = servoNotes[0];
+        int difference = angle - Fserv;
+        myStepper.step(difference/degree);
+        currAngle = angle;
+      } else if (octave = 4) {
+        int angle = servoNotes[0];
+        int difference = angle - Gserv;
+        myStepper.step(difference/degree);
+        currAngle = angle;
+      } else if (octave = 5) {
+        int angle = servoNotes[0];
+        int difference = angle - Aserv;
+        myStepper.step(difference/degree);
+        currAngle = angle;
+      }
+    redefineNotes();
     strip.clear();
 
     //play mode
@@ -516,7 +557,11 @@ void playOutput() {
     //play the song
     duration = beats[i_note_index] * tempo * 1000; // in ms
     if (music) {
+<<<<<<< HEAD
       tone(SPEAKER_PIN, notes[i_note_index] * 2, duration); // TODO: define w/ Team what octave we should play in
+=======
+      tone(SPEAKER_PIN, *notes[i_note_index]*2, duration); // TODO: define w/ Team what octave we should play in
+>>>>>>> e4e5da3d2dab404c1a3eaefe311cb3a43f98d7bd
     }
 
     // metronome servo positioning penduluum
@@ -716,4 +761,16 @@ int* DFTind(int DFTsize, float samplePeriod) {
   }
 
   return &bestInd[0];
+}
+
+void redefineNotes() {
+  C = 16.3516*pow(2,octave);
+  D = 18.35405*pow(2,octave);
+  E = 20.60172*pow(2,octave);
+  F = 21.82676*pow(2,octave);
+  G = 24.49971*pow(2,octave);
+  A = 27.5*pow(2,octave);
+  B = 30.86771*pow(2,octave);
+  high_C = 32.70320*pow(2,octave);
+  rest = 0;
 }
