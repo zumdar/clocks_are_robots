@@ -248,7 +248,7 @@ void loop() {
     Serial.println("Play mode");
     while(digitalRead(START_BUTTON)) {// Loop until next press
       Serial.println("Waiting for octave select.");
-      myStepper.step(20);
+      myStepper.step(10);
       octave = analogRead(octavePin); //TODO: Map 1024 input values to 6 discrete octave values (0-5 for now)
       if (octave >= 0 && octave < 170) {
         strip.clear();
